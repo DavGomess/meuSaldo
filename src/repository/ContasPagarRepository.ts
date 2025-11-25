@@ -3,15 +3,30 @@ import { prisma } from "../lib/prisma"
 import { CriarContaInput } from "../types";
 
 export const criarConta = (dados: CriarContaInput, userId: number) => {
-    return prisma.contasPagar.create({ 
-        data: {
-            nome: dados.nome,
-            valor: dados.valor,
-            data: new Date(dados.data),
-            status: dados.status,
-            user: { connect: { id: userId } },
-            categoria: dados.categoriaId ? { connect: { id: dados.categoriaId } } : undefined,
-        } })
+    const data: Prisma.ContasPagarCreateInput = {
+        nome: dados.nome,
+        valor: dados.valor,
+        data: new Date(dados.data),
+        status: dados.status,
+        user: {
+            create: undefined,
+            connectOrCreate: undefined,
+            connect: undefined
+        }
+    };
+
+    if (userId) {
+        data.user = { connect: { id: userId } };
+    }
+
+    if (dados.categoriaId != null) {
+        data.categoria = { connect: { id: dados.categoriaId } };
+    }
+
+    return prisma.contasPagar.create({
+        data,
+        include: { categoria: true }
+    });
 }
 
 export const listarConta = (userId: number) => {
@@ -22,23 +37,30 @@ export const listarConta = (userId: number) => {
 }
 
 export const editarConta = async (id: number, dados: Partial<CriarContaInput>, userId: number) => {
-    const dataToUpdate: Prisma.ContasPagarUpdateInput = {
-        ...dados,
-        ...(dados.data && { data: new Date(dados.data) }),
-    };
+    const dataToUpdate: Prisma.ContasPagarUpdateInput = {}
+
+    if (dados.nome !== undefined) dataToUpdate.nome = dados.nome;
+    if (dados.valor !== undefined) dataToUpdate.valor = dados.valor;
+    if (dados.data !== undefined) dataToUpdate.data = new Date(dados.data);
 
     if (dados.categoriaId !== undefined) {
-        dataToUpdate.categoria = dados.categoriaId === null ? { disconnect: true } : { connect: { id: dados.categoriaId } };
+        if (dados.categoriaId === null || dados.categoriaId === 0) {
+            dataToUpdate.categoria = { disconnect: true };
+        } else {
+            dataToUpdate.categoria = { connect: { id: dados.categoriaId } };
+        }
     }
 
-    const result = await prisma.contasPagar.updateMany({
+
+    await prisma.contasPagar.update({
         where: { id, userId },
         data: dataToUpdate,
     });
 
-    return result.count > 0
-        ? await prisma.contasPagar.findUnique({ where: { id }, include: { categoria: true } })
-        : null;
+    return await prisma.contasPagar.findUnique({
+        where: { id },
+        include: { categoria: true },
+    });
 };
 
 export const deleteConta = (id: number, userId: number) => {

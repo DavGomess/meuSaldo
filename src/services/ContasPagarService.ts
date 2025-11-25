@@ -7,11 +7,14 @@ import { prisma } from "@/lib/prisma";
 export class ContasService {
     async criarContaService(dados: CriarContaInput, userId: number) {
         
-        if (dados.categoriaId) {
+        if (dados.categoriaId != null) {
             const categoria = await prisma.categoria.findFirst({
             where: {
                 id: dados.categoriaId,
-                userId,
+                OR: [
+                    { userId },
+                    { userId: null }
+                ],
             },
         });
 
@@ -24,8 +27,8 @@ export class ContasService {
         return criarConta(
             {
                 ...dados,
-                status,
-                categoriaId: dados.categoriaId,
+                status, 
+                categoriaId: dados.categoriaId ?? null,
             },
             userId
         );

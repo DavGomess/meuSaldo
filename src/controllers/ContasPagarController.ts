@@ -13,7 +13,7 @@ export class ContasPagarController {
         const conta = await this.contasService.criarContaService({
             nome,
             valor: Number(valor),
-            categoriaId: categoriaId ? Number(categoriaId) : undefined,
+            categoriaId: categoriaId != null ? Number(categoriaId) : null,
             data,
             status: "pendente",
         },
