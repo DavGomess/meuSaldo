@@ -253,26 +253,32 @@ export default function ContasPagar() {
     };
 
     const deletarConta = async (conta: ContaLocal) => {
-
         const token = sessionStorage.getItem("token");
-        const res = await fetch(`http://localhost:4000/contasPagar/${conta.id}`, {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-        });
+        if (!token) return;
 
-        if (res.ok) {
-            const contasDeletadas = contas.filter(c => c.id !== conta.id)
-            setContas(contasDeletadas)
-            localStorage.setItem("contas", JSON.stringify(contasDeletadas))
+        try {
+            const resConta = await fetch(`http://localhost:4000/contasPagar/${conta.id}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}`}
+            });
 
-            setTransacoes(prev => {
-                const atualizado = prev.filter(t => t.contaId !== conta.id)
-                localStorage.setItem("transacoes", JSON.stringify(atualizado))
-                return atualizado;
-            })
+            if (!resConta.ok) throw new Error("Erro ao deletar conta");
+
+            const resTransacao = await fetch(`http://localhost:4000/transacoes/conta/${conta.id}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (!resTransacao) {
+                console.warn("Transação não encontrada ou já deletada");
+            }
+
+            setContas(prev => prev.filter(c => c.id !== conta.id));
+            setTransacoes(prev => prev.filter(t => t.contaId !== conta.id));
+
+            showToast("Conta deletada com sucesso!", "success");
+        } catch {
+            showToast("Erro ao deletar conta", "danger");
         }
     }
 
