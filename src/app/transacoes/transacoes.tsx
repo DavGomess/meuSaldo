@@ -3,7 +3,6 @@ import styles from "./transacoes.module.css";
 import CategoriaModal from "../components/CategoriaModal";
 import PeriodoModal from "../components/PeriodoModal";
 import { PeriodoSelecionado, TransacaoLocal } from "../../types";
-import { categorias as categoriasFixas } from "../data/categorias";
 import { useCategorias } from "../../contexts/CategoriaContext";
 import { useTransacoes } from "../../contexts/TransacoesContext";
 import { useDisplayPreferences } from '../../contexts/DisplayPreferencesContext';
@@ -21,86 +20,109 @@ export default function Transacoes() {
     const [pesquisa, setPesquisa] = useState("");
     const { exibirAbreviado } = useDisplayPreferences();
 
+    const parseDate = (dateString: string): Date => {
+    const datePart = dateString.split("T")[0];
+    const [ano, mes, dia] = datePart.split("-").map(Number);
+    return new Date(ano, mes - 1, dia); 
+};
 
-    useEffect(() => {
-        const carregarTodas = async () => {
-            const token = localStorage.getItem("token");
-            if (!token) return;
+const formatarDataParaExibir = (dateString: string): string => {
+    if (!dateString) return "Data inválida";
+    try {
+        return parseDate(dateString).toLocaleDateString("pt-BR");
+    } catch {
+        return "Data inválida";
+    }
+};
 
-            try {
-                const res = await fetch("http://localhost:4000/transacoes", {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                if (res.ok) {
-                    const data: TransacaoLocal[] = await res.json();
-                    setTransacoes(data);
-                    localStorage.setItem("transacoes", JSON.stringify(data));
-                }
-            } catch {
-                showToast("Erro ao carregar transações", "danger");
+    const carregarTransacoes = async () => {
+        const token = sessionStorage.getItem("token");
+        if (!token) return;
+    
+
+        try {
+            const res = await fetch("http://localhost:4000/transacoes", {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (res.ok) {
+                const data: TransacaoLocal[] = await res.json();
+                const corrigidas = data.map(t => ({
+                    ...t,
+                    data: t.data.split('T')[0]
+                }));
+                setTransacoes(corrigidas);
             }
-        };
-        carregarTodas();
-    }, [setTransacoes, showToast]);
+        } catch {
+            showToast("Erro ao carregar transações", "danger");
+        }
+    };
+    useEffect(() => {
+        carregarTransacoes();
+    }, []);
 
     useEffect(() => {
-        if (!pesquisa) return;
+        const termo = pesquisa.trim().toLowerCase();
+        if (!termo) {
+            carregarTransacoes();
+            return;
+        }
 
-        setSelectedCategoria([]);
-        setSelectedPeriodo(null);
-
-        const timer = setTimeout(async () => {
-            const token = localStorage.getItem("token");
+        const filtrar = async () => {
+            const token = sessionStorage.getItem("token");
             if (!token) return;
 
             try {
                 const res = await fetch(
-                    `http://localhost:4000/transacoes/filtrar?termo=${encodeURIComponent(pesquisa)}`,
+                    `http://localhost:4000/transacoes/filtrar?termo=${encodeURIComponent(termo)}`,
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
                 if (res.ok) {
                     const data: TransacaoLocal[] = await res.json();
-                    setTransacoes(data);
+                    const corrigidas = data.map(t => ({
+                        ...t,
+                        data: t.data.split('T')[0]
+                    }));
+                    setTransacoes(corrigidas);
                 }
             } catch {
                 showToast("Erro na pesquisa", "danger");
             }
-        }, 500);
+        };
+        filtrar();
+    }, [pesquisa]);
 
-        return () => clearTimeout(timer);
-    }, [pesquisa, setTransacoes, showToast]);
-
+    function zerarHoras(data: Date) {
+        const d = new Date(data);
+        d.setHours(0, 0, 0, 0);
+        return d;
+    }
     const transacoesFiltradas = transacoes.filter((t) => {
         const matchCategoria = selectedCategoria.length === 0 || selectedCategoria.includes(t.categoria);
 
         let matchPeriodo = true;
+
         if (selectedPeriodo) {
-            const dataTransacao = new Date(t.data);
+
             if (selectedPeriodo.tipo === "predefinido" && selectedPeriodo.dias) {
-                const limite = new Date();
+                const hoje = zerarHoras(new Date());
+                const limite = zerarHoras(new Date());
                 limite.setDate(limite.getDate() - selectedPeriodo.dias);
-                matchPeriodo = dataTransacao >= limite;
+
+                const data = zerarHoras(parseDate(t.data));
+
+                matchPeriodo = data >= limite && data <= hoje;
+
             } else if (selectedPeriodo.tipo === "personalizado" && selectedPeriodo.inicio && selectedPeriodo.fim) {
-                matchPeriodo = dataTransacao >= selectedPeriodo.inicio && dataTransacao <= selectedPeriodo.fim;
+                const inicio = zerarHoras(new Date(selectedPeriodo.inicio));
+                const fim = zerarHoras(new Date(selectedPeriodo.fim));
+                const data = zerarHoras(parseDate(t.data));
+
+                matchPeriodo = data >= inicio && data <= fim;
             }
         }
-
         return matchCategoria && matchPeriodo;
     });
 
-    const handleOpenCategoriaModal = () => setOpenModal("categoria");
-    const handleOpenPeriodoModal = () => setOpenModal("periodo");
-    const handleCloseModal = () => setOpenModal(null);
-
-    const handleSelectCategoria = (categorias: string[]) => {
-        setSelectedCategoria(categorias);
-        handleCloseModal();
-    };
-
-    const handleSelectPeriodo = (periodo: PeriodoSelecionado) => {
-        setSelectedPeriodo(periodo);
-        handleCloseModal();
-    };
 
     const displayCategorias = () => {
         if (selectedCategoria.length === 0) return "Categoria";
@@ -108,19 +130,29 @@ export default function Transacoes() {
         return `${selectedCategoria[0]}, +${selectedCategoria.length - 1}`;
     };
 
-    const categoriasCombinadas = {
-        Receita: [
-            ...categoriasFixas.Receita.filter(c => c !== "Todos"),
-            ...categorias.filter(c => c.tipo === "receita").map(c => c.nome),
-            "Todos"
-        ],
-        Despesa: [
-            ...categoriasFixas.Despesa.filter(c => c !== "Todos"),
-            ...categorias.filter(c => c.tipo === "despesa").map(c => c.nome),
-            "Todos"
-        ],
+    const categoriasUsuario = {
+        Receita: categorias.filter(c => c.tipo === "receita").map(c => c.nome),
+        Despesa: categorias.filter(c => c.tipo === "despesa").map(c => c.nome),
     };
 
+    const handleOpenCategoriaModal = () => setOpenModal("categoria");
+    const handleOpenPeriodoModal = () => setOpenModal("periodo");
+    const handleCloseModal = () => {
+        setOpenModal(null);
+    };
+
+    const handleSelectCategoria = (categorias: string[]) => {
+        if (categorias.length === 0) {
+            setSelectedCategoria([]);
+            return;
+        }
+        setSelectedCategoria(categorias);
+    };
+
+    const handleSelectPeriodo = (periodo: PeriodoSelecionado | null) => {
+        setSelectedPeriodo(periodo);
+        handleCloseModal();
+    };
 
     return (
         <div className={styles.main}>
@@ -174,7 +206,7 @@ export default function Transacoes() {
                                 <div className={styles.infoTransacao}>
                                     <div className={styles.ladoEsquerdoTransacao}>
                                         <div className={styles.iconTransacao}>
-                                            {categoriasCombinadas.Despesa.includes(conta.categoria) ? (
+                                            {categoriasUsuario.Despesa.includes(conta.categoria) ? (
                                                 <i className="bi bi-arrow-down iconArrowDown"></i>
                                             ) : (
                                                 <i className="bi bi-arrow-up iconArrowUp"></i>
@@ -182,15 +214,16 @@ export default function Transacoes() {
                                         </div>
                                         <div className={styles.textosTransacao}>
                                             <h6>{conta.contaNome}</h6>
-                                            <p>{conta.categoria} • {conta.status}</p>
+                                            <p>{conta.categoria}  </p>
                                         </div>
                                         <div className={styles.dataTransacao}>
-                                            <span>{new Date(conta.data).toLocaleDateString("pt-BR")}</span>
+                                            <span>{formatarDataParaExibir(conta.data)}</span>
+                                            <span>{conta.status}</span>
                                         </div>
                                     </div>
                                     <div className={styles.ladoDireitoTransacao}>
                                         <div className={styles.valorTransacao}>
-                                            {categoriasCombinadas.Despesa.includes(conta.categoria) ? (
+                                            {categoriasUsuario.Despesa.includes(conta.categoria) ? (
                                                 <h5 className={styles.vermelhoTextoValor}>- {formatarValor(conta.valor, exibirAbreviado)}</h5>
                                             ) : (
                                                 <h5 className={styles.verdeTextoValor}>+ {formatarValor(conta.valor, exibirAbreviado)}</h5>
@@ -210,7 +243,8 @@ export default function Transacoes() {
                 <CategoriaModal
                     onClose={handleCloseModal}
                     onSelect={handleSelectCategoria}
-                    categorias={categoriasCombinadas}
+                    categoriasUsuario={categoriasUsuario}
+                    selectedCategoria={selectedCategoria}  
                 />
             )}
         </div>
