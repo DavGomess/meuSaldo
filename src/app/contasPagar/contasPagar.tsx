@@ -603,6 +603,7 @@ const formatarDataParaExibir = (dateString: string): string => {
                         onClose={handleCloseModal}
                         onSelect={handleSelectCategoria}
                         categoriasUsuario={categoriasParaModal}
+                        selectedCategoria={categoriaDisplay !== "Categoria" ? [categoriaDisplay] : []}
                     />
                 )
             }
