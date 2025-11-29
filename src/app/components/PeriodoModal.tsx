@@ -7,7 +7,7 @@ import { useToast } from "../../contexts/ToastContext";
 
 type PeriodoModalProps = {
     onClose: () => void;
-    onSelect: (periodo: PeriodoSelecionado) => void;
+    onSelect: (periodo: PeriodoSelecionado | null) => void;
 };
 
 export default function PeriodoModal({ onClose, onSelect }: PeriodoModalProps) {
@@ -25,7 +25,10 @@ export default function PeriodoModal({ onClose, onSelect }: PeriodoModalProps) {
             const dias = parseInt(selectedTemp.split(" ")[0], 10);
             onSelect({ tipo: "predefinido", dias });
             onClose();
-        }else if (dataInicial && dataFinal) {
+            return;
+        }
+        
+        if (dataInicial && dataFinal) {
             if ( diffDias > 365) {
                 showToast("O período personalizado não pode exceder 1 ano.", "danger");
                 return;
@@ -33,9 +36,17 @@ export default function PeriodoModal({ onClose, onSelect }: PeriodoModalProps) {
             onSelect({ tipo: "personalizado", inicio: dataInicial, fim: dataFinal });
             onClose();
         }
+    };
+
+    const handleClear = () => {
+        setSelectedTemp(null);
+        setDataInicial(null);
+        setDataFinal(null);
+        onSelect(null);
+        onClose();
     }
 
-    const isBotaoConfirmarAtivo = selectedTemp !== null || (dataInicial !== null && dataFinal !== null && diffDias <= 365);
+    const isBotaoConfirmarAtivo = selectedTemp !== null || (dataInicial !== null && dataFinal !== null && diffDias >= 0 && diffDias <= 365);
 
     return (
         <>
@@ -114,6 +125,9 @@ export default function PeriodoModal({ onClose, onSelect }: PeriodoModalProps) {
                         </div>
                     </div>
                     <div className="modal-footer">
+                        <button className="btn btn-secondary" onClick={handleClear}>
+                            Limpar
+                        </button>
                         <button className="btn btn-primary" onClick={handleConfirm}
                         disabled={!isBotaoConfirmarAtivo}>
                             Confirmar
