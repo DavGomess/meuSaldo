@@ -3,6 +3,13 @@ import { TransacaoRepository } from "../repository/TransacaoRepository";
 import { StatusConta } from "@/utils/status";
 
 export class TransacaoService {
+    async criar(data: { userId: number; valor: number; tipo: string; data: string; status: string; categoriaId: number; contaId: number}): Promise<TransacaoLocal> {
+        const transacaoCriada = await TransacaoRepository.criar(data);
+        const transacoes = await TransacaoRepository.findAllByUser(data.userId);
+        const formatada = this.formatTransacoes(transacoes).find(t => t.id === transacaoCriada.id);
+        return formatada || this.formatTransacoes([transacaoCriada])[0];
+    }
+
     async listar(userId: number): Promise<TransacaoLocal[]> {
         const transacoes = await TransacaoRepository.findAllByUser(userId);
         return this.formatTransacoes(transacoes);
@@ -22,19 +29,21 @@ export class TransacaoService {
         const isStatusValid = (s: string): s is StatusConta => ["pendente", "paga", "vencida"].includes(s);
 
         return transacoes.map((t) => {
-            if (!isStatusValid(t.status)) {
-                throw new Error(`Status inválido: ${t.status}`);
-            }
+            const status = isStatusValid(t.status) ? t.status : "pendente";
+
+            const nomeConta = t.conta?.nome || "Sem conta";
 
             return {
                 id: t.id,
                 valor: t.valor,
                 tipo: t.tipo as TransacaoTipo,
                 data: t.data.toISOString(),
-                status: t.status as TransacaoStatus,
+                status: status as TransacaoStatus,
                 categoria: t.categoria?.nome || "Sem categoria",
                 categoriaId: t.categoriaId,
-                contaNome: t.conta?.nome || "Sem conta"
+                contaId: t.contaId || 0,
+                contaNome: nomeConta,
+                nome: nomeConta
             }
         })
     }

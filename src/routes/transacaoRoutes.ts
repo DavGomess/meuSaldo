@@ -9,5 +9,6 @@ router.use(authenticateToken);
 
 router.get("/", controller.listar.bind(controller));
 router.get("/filtrar", controller.filtrar.bind(controller));
+router.post("/", controller.criar.bind(controller));
 
 export default router;

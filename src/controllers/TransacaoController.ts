@@ -4,6 +4,30 @@ import { TransacaoService } from "../services/TransacaoService";
 const transacaoService = new TransacaoService();
 
 export class TransacaoController {
+    async criar(req: Request, res: Response) {
+        try {
+            if (!req.user) {
+                return res.status(401).json({ message: "Usuário não autenticado" });
+            }
+            const userId = req.user.id;
+            const { valor, tipo, data, status, categoriaId, contaId } = req.body;
+            
+            const transacao = await transacaoService.criar({
+                userId,
+                valor,
+                tipo,
+                data,
+                status,
+                categoriaId,
+                contaId
+            });
+            return res.status(201).json(transacao);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "Erro ao criar transação";
+            return res.status(400).json({ message });
+        }
+    }
+
     async listar(req: Request, res: Response) {
     try {
         if (!req.user) {
