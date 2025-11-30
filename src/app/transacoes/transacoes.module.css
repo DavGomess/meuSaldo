@@ -245,8 +245,8 @@
 }
 
 .dataTransacao {
-    display: flex;
-    flex-direction: column;
+    display: flex; 
+    height: 2.3rem;
 }
 
 .dataTransacao span {

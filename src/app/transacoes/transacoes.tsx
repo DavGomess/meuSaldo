@@ -218,7 +218,7 @@ const formatarDataParaExibir = (dateString: string): string => {
                                         </div>
                                         <div className={styles.dataTransacao}>
                                             <span>{formatarDataParaExibir(conta.data)}</span>
-                                            <span>{conta.status}</span>
+                                            {/* <span>{conta.status}</span> */}
                                         </div>
                                     </div>
                                     <div className={styles.ladoDireitoTransacao}>
