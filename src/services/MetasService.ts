@@ -10,7 +10,10 @@ export class MetasService {
             const categoria = await prisma.categoria.findFirst({
                 where: {
                     id: input.categoriaId,
-                    userId,
+                    OR: [
+                        { userId },      
+                        { userId: null }
+                    ]
                 },
         });
 
@@ -21,8 +24,8 @@ export class MetasService {
         const data = await this.repository.criar({
             titulo: input.titulo,
             categoriaId: input.categoriaId,
-            valor: input.valorAlvo,
-            prazo: new Date(input.prazo),
+            valorAlvo: input.valorAlvo,
+            prazo: new Date(input.prazo.split("T")[0]),
             userId
         });
         return this.toLocal(data);
@@ -36,7 +39,7 @@ export class MetasService {
     async adicionarValor(id: number, valor: number, userId: number): Promise<MetaLocal> {
         const meta = await this.repository.listarPorUser(userId).then(m => m.find(m => m.id === id));
         if (!meta) throw new Error("Meta não encontrada");
-        const novoValor = Math.min(meta.valorAtual + valor, meta.valor);
+        const novoValor = Math.min(meta.valorAtual + valor, meta.valorAlvo);
         const atualizada = await this.repository.atualizarValor(id, novoValor, userId);
         return this.toLocal(atualizada);
     }
@@ -47,9 +50,9 @@ export class MetasService {
                 id: meta.id,
                 titulo: meta.titulo,
                 categoriaId: meta.categoriaId,
-                valor: meta.valorAlvo,
+                valorAlvo: meta.valorAlvo,
                 valorAtual: meta.valorAtual,
-                prazo: new Date(meta.prazo)
+                prazo: new Date(meta.prazo.split("T")[0])
             },
             userId
         );
@@ -65,9 +68,9 @@ export class MetasService {
             id: meta.id,
             titulo: meta.titulo,
             categoriaId: meta.categoriaId,
-            valorAlvo: Number(meta.valor),
+            valorAlvo: Number(meta.valorAlvo),
             valorAtual: Number(meta.valorAtual),
-            prazo: meta.prazo.toISOString()
+            prazo:  meta.prazo.toISOString().split("T")[0]
         }
     }
 }
