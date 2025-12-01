@@ -1,7 +1,7 @@
 "use client";
 
 import { MetaFromAPI, MetaLocal } from "../types"
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 
 interface MetasContextType {
     metas: MetaLocal[];
@@ -31,7 +31,7 @@ export const MetasProvider = ({ children }: { children: ReactNode }) => {
         return () => window.removeEventListener("storage", handleStorageChange);
     }, []);
 
-    const sync = async () => {
+    const sync = useCallback(async () => {
         if (!token) {
             setMetas([]);
             return;
@@ -58,11 +58,11 @@ export const MetasProvider = ({ children }: { children: ReactNode }) => {
         } catch (err) {
             console.error("Erro ao sincronizar metas:", err);
         }
-    };
+    }, [token]);
 
     useEffect(() => {
         sync();
-    }, [token]);
+    }, [sync]);
 
     const adicionarMeta = async (meta: Omit<MetaLocal, "id" | "valorAtual">) => {
         if (!token) throw new Error("Não autenticado");
