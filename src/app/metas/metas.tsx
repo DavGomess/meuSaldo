@@ -52,7 +52,7 @@ export default function Metas() {
     return `${ano}-${mes}-${dia}`;
 };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         if (!novaData) return;
@@ -166,6 +166,7 @@ export default function Metas() {
             <div className={styles.cardNovaMeta}>
                 <h2><i className="bi bi-bullseye"></i>Criar Nova Meta</h2>
                 <form className={styles.formularioNovaMeta} onSubmit={(e) => {
+                    e.preventDefault();
                     if (modoEdicao) {
                         handleEdit(e);
                     } else {

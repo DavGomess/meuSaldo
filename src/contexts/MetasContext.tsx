@@ -1,7 +1,8 @@
 "use client";
 
 import { MetaFromAPI, MetaLocal } from "../types"
-import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { useAuth } from "./AuthContext";
 
 interface MetasContextType {
     metas: MetaLocal[];
@@ -15,36 +16,23 @@ const MetasContext = createContext<MetasContextType | undefined>(undefined);
 
 export const MetasProvider = ({ children }: { children: ReactNode }) => {
     const [metas, setMetas] = useState<MetaLocal[]>([]);
-    const API = "http://localhost:4000/metas";
-    const [token, setToken] = useState<string | null>(null);
+    const { user } = useAuth();
 
-    useEffect(() => {
-        const storad = sessionStorage.getItem("token");
-        setToken(storad);
-
-        const handleStorageChange = () => {
-            const newToken = sessionStorage.getItem("token");
-            setToken(newToken);
-        };
-
-        window.addEventListener("storage", handleStorageChange);
-        return () => window.removeEventListener("storage", handleStorageChange);
-    }, []);
-
-    const sync = useCallback(async () => {
+    const sync = async () => {
+        const token = sessionStorage.getItem("token") || localStorage.getItem("token");
         if (!token) {
             setMetas([]);
             return;
         }
+
         try {
-            const res = await fetch(API, { headers: { Authorization: `Bearer ${token}` } });
+            const res = await fetch("http://localhost:4000/metas", { headers: { Authorization: `Bearer ${token}` } });
+
             if (!res.ok) {
-                if (res.status === 401) {
-                    sessionStorage.removeItem("token");
-                    setToken(null);
-                }
+                setMetas([]);
                 return;
             }
+
             const metasBackend: MetaFromAPI[] = await res.json();
             const metasLocal: MetaLocal[] = metasBackend.map(meta => ({
                 id: meta.id,
@@ -55,19 +43,24 @@ export const MetasProvider = ({ children }: { children: ReactNode }) => {
                 prazo: String(meta.prazo).split("T")[0]
             }));
             setMetas(metasLocal);
-        } catch (err) {
-            console.error("Erro ao sincronizar metas:", err);
+        } catch {
+            setMetas([]);
         }
-    }, [token]);
+    };
 
     useEffect(() => {
-        sync();
-    }, [sync]);
+        if (user) {
+            sync();
+        } else {
+            setMetas([]);
+        }
+    }, [user]);
 
     const adicionarMeta = async (meta: Omit<MetaLocal, "id" | "valorAtual">) => {
+        const token = sessionStorage.getItem("token") || localStorage.getItem("token");
         if (!token) throw new Error("Não autenticado");
 
-        const res = await fetch(API, {
+        const res = await fetch("http://localhost:4000/metas", {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
             body: JSON.stringify(meta),
@@ -80,9 +73,10 @@ export const MetasProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const adicionarValorMeta = async (id: number, valor: number) => {
+        const token = sessionStorage.getItem("token") || localStorage.getItem("token");
         if (!token) throw new Error("Não autenticado");
 
-        const res = await fetch(`${API}/${id}/valor`, {
+        const res = await fetch(`${"http://localhost:4000/metas"}/${id}/valor`, {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
             body: JSON.stringify({ valor }),
@@ -95,8 +89,9 @@ export const MetasProvider = ({ children }: { children: ReactNode }) => {
     }
 
     const editarMeta = async (meta: MetaLocal) => {
+        const token = sessionStorage.getItem("token") || localStorage.getItem("token");
         if (!token) throw new Error("Não autenticado");
-        const res = await fetch(API, {
+        const res = await fetch("http://localhost:4000/metas", {
             method: "PUT",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
             body: JSON.stringify(meta),
@@ -109,9 +104,10 @@ export const MetasProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const removerMeta = async (id: number) => {
+        const token = sessionStorage.getItem("token") || localStorage.getItem("token");
         if (!token) throw new Error("Não autenticado");
 
-        const res = await fetch(`${API}/${id}`, {
+        const res = await fetch(`${"http://localhost:4000/metas"}/${id}`, {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` }
         });
@@ -121,8 +117,6 @@ export const MetasProvider = ({ children }: { children: ReactNode }) => {
         }
         await sync();
     };
-
-
 
     return (
         <MetasContext.Provider value={{ metas, adicionarMeta, removerMeta, adicionarValorMeta, editarMeta }}>
