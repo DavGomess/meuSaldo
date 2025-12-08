@@ -7,7 +7,7 @@ import { useState } from "react";
 import styles from "./relatorios.module.css"
 import { useTransacoes } from "../../contexts/TransacoesContext";
 import { useCategorias } from "../../contexts/CategoriaContext";
-import { Transacao } from "../../types";
+import { TransacaoLocal } from "../../types";
 
 
 export default function Relatorios() {
@@ -23,13 +23,28 @@ export default function Relatorios() {
 
     const isValidToDownload = todosPeriodos || (formato && mes && ano);
 
-    function filtrarTransacoes(transacoes: Transacao[]): Transacao[] {
+    const parseDate = (dateString: string): Date => {
+        const datePart = dateString.split("T")[0];
+        const [ano, mes, dia] = datePart.split("-").map(Number);
+        return new Date(ano, mes - 1, dia);
+    };
+
+    const formatarDataParaExibir = (dateString: string): string => {
+        if (!dateString) return "Data inválida";
+        try {
+            return parseDate(dateString).toLocaleDateString("pt-BR");
+        } catch {
+            return "Data inválida";
+        }
+    };
+
+    function filtrarTransacoes(transacoes: TransacaoLocal[]): TransacaoLocal[] {
         let filtradas = transacoes;
 
         if (!todosPeriodos && (mes || ano)) {
             const mesNum = mes ? Number(mes) : null
             filtradas = filtradas.filter(t => {
-                const data = new Date(t.data);
+                const data = parseDate(t.data);
                 const anoMatch = ano ? String(data.getFullYear()) === ano : true;
                 const mesMatch = mesNum ? (data.getMonth() + 1) === mesNum : true;
                 return anoMatch && mesMatch;
@@ -37,9 +52,9 @@ export default function Relatorios() {
         }
 
         if (formato === "receita") {
-            filtradas = filtradas.filter(t => categoriaMap.get(t.categoriaId)?.tipo === "receita");
+            filtradas = filtradas.filter((t) => t.categoriaId !== null && categoriaMap.get(t.categoriaId)?.tipo === "receita");
         } else if (formato === "despesa") {
-            filtradas = filtradas.filter(t => categoriaMap.get(t.categoriaId)?.tipo === "despesa");
+            filtradas = filtradas.filter((t) => t.categoriaId !== null && categoriaMap.get(t.categoriaId)?.tipo === "despesa");
         }
 
         return filtradas;
@@ -65,80 +80,97 @@ export default function Relatorios() {
     }
 
     const handleDownloadExecel = () => {
-        const dados = filtrarTransacoes(transacoes.filter(t => t.categoriaId !== null) as Transacao[]);
+        const dados = filtrarTransacoes(transacoes.filter(t => t.categoriaId !== null) as TransacaoLocal[]);
 
         const totalReceitas = dados
-            .filter(d => categoriaMap.get(d.categoriaId)?.tipo === "receita")
+            .filter(d => categoriaMap.get(d.categoriaId!)?.tipo === "receita")
             .reduce((acc, d) => acc + d.valor, 0);
 
         const totalDespesas = dados
-            .filter(d => categoriaMap.get(d.categoriaId)?.tipo === "despesa")
+            .filter(d => categoriaMap.get(d.categoriaId!)?.tipo === "despesa")
             .reduce((acc, d) => acc + d.valor, 0);
 
         const dadosFormatados = dados.map(d => {
-            const cat = categoriaMap.get(d.categoriaId);
-            return {
-                Nome: d.nome,
-                Categoria: cat?.nome ?? "Desconhecida",
-                Valor: d.valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }),
-                Tipo: cat?.tipo ?? "desconhecida",
-                Date: new Date(d.data).toLocaleDateString("pt-BR")
-            }
-        })
-        const worksheet = XLSX.utils.json_to_sheet(
-            [
-                { Nome: `Receitas: ${totalReceitas}`, Categoria: `Despesas: ${totalDespesas}` },
-                {},
-                ...dadosFormatados
-            ],
-            { skipHeader: false }
-        );
+            const cat = categoriaMap.get(d.categoriaId!);
+            return [
+                d.nome || "Sem descrição",
+                cat?.nome ?? "Desconhecida",
+                d.valor,
+                (cat?.tipo || "desconhecida").charAt(0).toUpperCase() + (cat?.tipo || "desconhecida").slice(1),
+                formatarDataParaExibir(d.data)
+            ];
+        });
 
-        const range = XLSX.utils.decode_range(worksheet['!ref'] || '');
+        const ws = XLSX.utils.aoa_to_sheet([
+            [getTituloRelatorio()],
+            [],
+            [`Receitas: ${totalReceitas.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`, "", "", "", `Despesas: ${totalDespesas.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`],
+            [],
+            ["Nome", "Categoria", "Valor (R$)", "Tipo", "Data"],
+            ...dadosFormatados
+        ]);
 
-        for (let C = range.s.c; C <= range.e.c; ++C) {
-            const cellAddress = XLSX.utils.encode_cell({ r: 2, c: C });
-            if (!worksheet[cellAddress]) continue;
-            worksheet[cellAddress].s = {
+        ws["A1"].s = {
+            font: { bold: true, sz: 16, color: { rgb: "FFFFFF" } },
+            fill: { fgColor: { rgb: "2563EB" } },
+            alignment: { horizontal: "center" }
+        };
+        ws["!merges"] = [
+            { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } },
+            { s: { r: 2, c: 0 }, e: { r: 2, c: 1 } },
+            { s: { r: 2, c: 3 }, e: { r: 2, c: 4 } }
+        ];
+
+        ws["D3"] = {
+            v: `Despesas: ${totalDespesas.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`,
+            t: "s"
+        };
+        ws["D3"].s = {
+            font: { bold: true, color: { rgb: "FFFFFF" }, sz: 12 },
+            fill: { fgColor: { rgb: "EF4444" } },
+            alignment: { horizontal: "center", vertical: "center" }
+        };
+
+        ws["A3"] = {
+            v: `Receitas: ${totalReceitas.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`,
+            t: "s"
+        };
+        ws["A3"].s = {
+            font: { bold: true, color: { rgb: "FFFFFF" }, sz: 12 },
+            fill: { fgColor: { rgb: "22C55E" } },
+            alignment: { horizontal: "center", vertical: "center" }
+        };
+
+        ["A5", "B5", "C5", "D5", "E5"].forEach(cell => {
+            ws[cell].s = {
                 font: { bold: true, color: { rgb: "FFFFFF" } },
                 fill: { fgColor: { rgb: "2563EB" } },
-                alignment: { horizontal: "center" },
-                border: {
-                    top: { style: "thin", color: { rgb: "000000" } },
-                    bottom: { style: "thin", color: { rgb: "000000" } },
-                    left: { style: "thin", color: { rgb: "000000" } },
-                    right: { style: "thin", color: { rgb: "000000" } },
-                },
+                alignment: { horizontal: "center" }
             };
-        }
+        });
 
-        if (worksheet["A1"]) {
-            worksheet["A1"].s = {
-                font: { bold: true, color: { rgb: "FFFFFF" } },
-                fill: { fgColor: { rgb: "22C55E" } },
-                alignment: { horizontal: "center" },
-            };
-        }
-        if (worksheet["B1"]) {
-            worksheet["B1"].s = {
-                font: { bold: true, color: { rgb: "FFFFFF" } },
-                fill: { fgColor: { rgb: "EF4444" } },
-                alignment: { horizontal: "center" },
-            };
-        }
+        dadosFormatados.forEach((_, i) => {
+            const cell = XLSX.utils.encode_cell({ r: 5 + i, c: 2 });
+            if (ws[cell]) {
+                ws[cell].z = '"R$" #,##0.00';
+            }
+        });
 
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Relatório");
+        ws["!cols"] = [
+            { wch: 25 },
+            { wch: 20 },
+            { wch: 18 },
+            { wch: 12 },
+            { wch: 15 }
+        ];
 
-        const nomeArquivo = todosPeriodos
-            ? "relatorio-completo.xlsx"
-            : `relatorio-${mes || "mes"}-${ano || "ano"}.xlsx`;
-
-        XLSX.writeFile(workbook, nomeArquivo);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Relatório");
+        XLSX.writeFile(wb, getNomeArquivo("xlsx"));
     };
 
     const handleDownloadPDF = () => {
-        const dados = filtrarTransacoes(transacoes.filter(t => t.categoriaId !== null) as Transacao[]);
+        const dados = filtrarTransacoes(transacoes.filter(t => t.categoriaId !== null));
 
         const doc = new jsPDF();
         const pageWidth = doc.internal.pageSize.getWidth();
@@ -153,11 +185,11 @@ export default function Relatorios() {
         doc.text(titulo, pageWidth / 2, 20, { align: "center" });
 
         const totalReceitas = dados
-            .filter(d => categoriaMap.get(d.categoriaId)?.tipo === "receita")
+            .filter(d => categoriaMap.get(d.categoriaId!)?.tipo === "receita")
             .reduce((acc, d) => acc + d.valor, 0);
 
         const totalDespesas = dados
-            .filter(d => categoriaMap.get(d.categoriaId)?.tipo === "despesa")
+            .filter(d => categoriaMap.get(d.categoriaId!)?.tipo === "despesa")
             .reduce((acc, d) => acc + d.valor, 0);
 
         const cardWidth = 80;
@@ -187,17 +219,17 @@ export default function Relatorios() {
             startY: 55,
             head: [["nome", "Categoria", "Valor (R$)", "Tipo", "Data"]],
             body: dados.map((d) => {
-                const cat = categoriaMap.get(d.categoriaId);
+                const cat = categoriaMap.get(d.categoriaId!);
                 return [
                     d.nome,
                     cat?.nome ?? "Desconhecida",
                     d.valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }),
                     cat?.tipo ?? "desconhecida",
-                    new Date(d.data).toLocaleDateString("pt-BR")
+                    formatarDataParaExibir(d.data)
                 ];
             }),
             theme: "grid",
-            headStyles: { fillColor: [220, 38, 38] },
+            headStyles: { fillColor: [37, 99, 235] },
             styles: { halign: "center" },
         });
 
