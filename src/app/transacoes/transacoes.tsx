@@ -2,18 +2,16 @@ import { useState, useEffect } from "react";
 import styles from "./transacoes.module.css";
 import CategoriaModal from "../components/CategoriaModal";
 import PeriodoModal from "../components/PeriodoModal";
-import { PeriodoSelecionado, TransacaoLocal } from "../../types";
+import { PeriodoSelecionado } from "../../types";
 import { useCategorias } from "../../contexts/CategoriaContext";
 import { useTransacoes } from "../../contexts/TransacoesContext";
 import { useDisplayPreferences } from '../../contexts/DisplayPreferencesContext';
 import { formatarValor } from "../../utils/formatarValor";
-import { useToast } from "../../contexts/ToastContext";
 
 
 export default function Transacoes() {
     const { categorias } = useCategorias();
-    const { transacoes, setTransacoes } = useTransacoes();
-    const { showToast } = useToast();
+    const { transacoes, syncTransacoes } = useTransacoes();
     const [openModal, setOpenModal] = useState<null | "categoria" | "periodo">(null);
     const [selectedCategoria, setSelectedCategoria] = useState<string[]>([]);
     const [selectedPeriodo, setSelectedPeriodo] = useState<PeriodoSelecionado | null>(null);
@@ -35,68 +33,21 @@ const formatarDataParaExibir = (dateString: string): string => {
     }
 };
 
-    const carregarTransacoes = async () => {
-        const token = sessionStorage.getItem("token");
-        if (!token) return;
-    
-
-        try {
-            const res = await fetch("http://localhost:4000/transacoes", {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            if (res.ok) {
-                const data: TransacaoLocal[] = await res.json();
-                const corrigidas = data.map(t => ({
-                    ...t,
-                    data: t.data.split('T')[0]
-                }));
-                setTransacoes(corrigidas);
-            }
-        } catch {
-            showToast("Erro ao carregar transações", "danger");
-        }
-    };
     useEffect(() => {
-        carregarTransacoes();
-    }, []);
+        syncTransacoes();
+    }, [syncTransacoes]);
 
-    useEffect(() => {
-        const termo = pesquisa.trim().toLowerCase();
-        if (!termo) {
-            carregarTransacoes();
-            return;
-        }
-
-        const filtrar = async () => {
-            const token = sessionStorage.getItem("token");
-            if (!token) return;
-
-            try {
-                const res = await fetch(
-                    `http://localhost:4000/transacoes/filtrar?termo=${encodeURIComponent(termo)}`,
-                    { headers: { Authorization: `Bearer ${token}` } }
-                );
-                if (res.ok) {
-                    const data: TransacaoLocal[] = await res.json();
-                    const corrigidas = data.map(t => ({
-                        ...t,
-                        data: t.data.split('T')[0]
-                    }));
-                    setTransacoes(corrigidas);
-                }
-            } catch {
-                showToast("Erro na pesquisa", "danger");
-            }
-        };
-        filtrar();
-    }, [pesquisa]);
+    const transacoesPesquisadas = transacoes.filter(t =>
+        t.nome.toLowerCase().includes(pesquisa.toLowerCase()) ||
+        t.categoria.toLowerCase().includes(pesquisa.toLowerCase())
+    );
 
     function zerarHoras(data: Date) {
         const d = new Date(data);
         d.setHours(0, 0, 0, 0);
         return d;
     }
-    const transacoesFiltradas = transacoes.filter((t) => {
+    const transacoesFiltradas = transacoesPesquisadas.filter((t) => {
         const matchCategoria = selectedCategoria.length === 0 || selectedCategoria.includes(t.categoria);
 
         let matchPeriodo = true;
@@ -213,12 +164,11 @@ const formatarDataParaExibir = (dateString: string): string => {
                                             )}
                                         </div>
                                         <div className={styles.textosTransacao}>
-                                            <h6>{conta.contaNome}</h6>
+                                            <h6>{conta.nome || "sem nome"}</h6>
                                             <p>{conta.categoria}  </p>
                                         </div>
                                         <div className={styles.dataTransacao}>
                                             <span>{formatarDataParaExibir(conta.data)}</span>
-                                            {/* <span>{conta.status}</span> */}
                                         </div>
                                     </div>
                                     <div className={styles.ladoDireitoTransacao}>

@@ -42,7 +42,6 @@ export class TransacaoService {
                 categoria: t.categoria?.nome || "Sem categoria",
                 categoriaId: t.categoriaId,
                 contaId: t.contaId || 0,
-                contaNome: nomeConta,
                 nome: nomeConta
             }
         })
