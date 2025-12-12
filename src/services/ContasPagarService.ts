@@ -42,11 +42,32 @@ export class ContasService {
         if (dados.valor && dados.valor <= 0) {
         throw new Error("O valor deve ser positivo");
     }
-    const result = await editarConta(id, dados, userId);
-    if (result === null) {
+
+    const contaAtualizada = await editarConta(id, dados, userId);
+
+    if (!contaAtualizada) {
         throw new Error("Conta não encontrada ou sem permissão para editar");
     }
-    return result;
+
+    let tipo: "receita" | "despesa" |undefined;
+
+    if (contaAtualizada.categoriaId) {
+        const categoria = await prisma.categoria.findUnique({
+            where: { id: contaAtualizada.categoriaId }
+        });
+        tipo = categoria?.tipo as "receita" | "despesa";
+    }
+
+    await prisma.transacao.updateMany({
+        where: { contaId: contaAtualizada.id, userId  },
+        data: {
+            valor: contaAtualizada.valor,
+            data: contaAtualizada.data,
+            categoriaId: contaAtualizada.categoriaId,
+            ...(tipo && { tipo })
+        }
+    });
+    return contaAtualizada;
 }
 
     async deleteContaService(id: number, userId: number) {
