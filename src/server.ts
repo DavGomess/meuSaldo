@@ -1,7 +1,14 @@
 import app from "./app";
+import { prisma } from "@/lib/prisma";
 
 const PORT = process.env.PORT || 4000;
 
-app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
+const server = app.listen(PORT, () => {
+    console.log(`Servidor rodando em http://localhost:${PORT}`);
+});
+
+process.on("SIGTERM", async () => {
+    console.log("Fechando servidor...");
+    await prisma.$disconnect();
+    server.close();
 });
