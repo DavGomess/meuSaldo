@@ -3,16 +3,17 @@ import styles from "./contasPagar.module.css"
 import { ContaLocal, PayloadEdicao } from "../../types";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { definirStatus, StatusConta } from "../../utils/status";
+import { StatusConta } from "../../utils/status";
 import { useCategorias } from "../../contexts/CategoriaContext";
 import CategoriaModal from "../components/CategoriaModal";
 import { useTransacoes } from "../../contexts/TransacoesContext";
 import { useToast } from "../../contexts/ToastContext";
 import { ContaFromAPI } from "../../types";
+import { mapContaFromAPI } from "@/utils/mapConta";
 
 export default function ContasPagar() {
     const { categorias } = useCategorias();
-    const { setTransacoes } = useTransacoes();
+    const { syncTransacoes } = useTransacoes();
     const { showToast } = useToast();
     const [contas, setContas] = useState<ContaLocal[]>([])
     const [selectedConta, setSelectedConta] = useState<ContaLocal | null>(null)
@@ -61,21 +62,7 @@ export default function ContasPagar() {
                 if (res.ok) {
                     const contasBanco: ContaFromAPI[] = await res.json();
 
-                    const contasFormatadas: ContaLocal[] = contasBanco.map(c => {
-                        const categoriaNome = c.categoria?.nome || categorias.find(cat => cat.id === c.categoriaId)?.nome || "Sem categoria";
-
-                        const statusCalculado = definirStatus(c.data);
-                        return {
-                            id: c.id,
-                            nome: c.nome,
-                            valor: c.valor,
-                            data: c.data,
-                            status: c.status === "paga" ? "paga" : statusCalculado,
-                            statusAnterior: c.statusAnterior,
-                            categoria: categoriaNome,
-                            categoriaId: c.categoriaId,
-                        };
-                    });
+                    const contasFormatadas = contasBanco.map(conta => mapContaFromAPI(conta, categorias));
 
                     setContas(contasFormatadas);
                     localStorage.setItem("contas", JSON.stringify(contasFormatadas));
@@ -131,15 +118,10 @@ export default function ContasPagar() {
         });
 
         if (res.ok) {
-            const contaSalva = await res.json();
-            const categoriaNome = categorias.find(c => c.id === contaSalva.categoriaId)?.nome || "Sem categoria";
-            const categoriaTipo = categorias.find(c => c.id === editCategoriaId)?.tipo || "despesa";
+            const contaSalvaAPI: ContaFromAPI = await res.json();
+            const categoriaTipo = categorias.find(c => c.id === contaSalvaAPI.categoriaId)?.tipo || "despesa";
 
-            const novaConta: ContaLocal = {
-                ...contaSalva,
-                categoria: categoriaNome,
-                categoriaId: contaSalva.categoriaId
-            };
+            const novaConta = mapContaFromAPI(contaSalvaAPI, categorias);
 
             setContas(prev => {
                 const atualizadas = [...prev, novaConta];
@@ -148,15 +130,14 @@ export default function ContasPagar() {
             });
 
             const novaTransacao = {
-                valor: contaSalva.valor,
+                valor: contaSalvaAPI.valor,
                 tipo: categoriaTipo,
-                data: contaSalva.data,
-                status: contaSalva.status,
-                categoriaId: contaSalva.categoriaId,
-                userId: contaSalva.userId,
-                contaId: contaSalva.id,           
+                data: contaSalvaAPI.data,
+                status: contaSalvaAPI.status,
+                categoriaId: contaSalvaAPI.categoriaId,
+                userId: contaSalvaAPI.userId,
+                contaId: contaSalvaAPI.id,
             };
-            console.log(novaTransacao)
 
             const transacaoRes = await fetch("http://localhost:4000/transacoes", {
                 method: "POST",
@@ -168,12 +149,7 @@ export default function ContasPagar() {
             });
 
             if (transacaoRes.ok) {
-                const transacaoSalva = await transacaoRes.json();
-                setTransacoes((prev) => {
-                    const atualizadas = [...prev, transacaoSalva];
-                    localStorage.setItem("transacoes", JSON.stringify(atualizadas));
-                    return atualizadas;
-                });
+                await syncTransacoes();
             }
 
             showToast("Conta criada com sucesso!", "success");
@@ -196,16 +172,16 @@ export default function ContasPagar() {
         } else if (statusAnterior === "paga") {
             const anterior = conta.statusAnterior;
 
-        if (anterior === "paga" || anterior === "pago") {
-            novoStatus = "paga";
-        } else if (anterior === "vencida" || anterior === "vencido") {
-            novoStatus = "vencida";
+            if (anterior === "paga" || anterior === "pago") {
+                novoStatus = "paga";
+            } else if (anterior === "vencida" || anterior === "vencido") {
+                novoStatus = "vencida";
+            } else {
+                novoStatus = "pendente";
+            }
         } else {
-            novoStatus = "pendente"; 
+            novoStatus = "pendente";
         }
-    } else {
-        novoStatus = "pendente"; 
-    }
 
         const contasAtualizadas = contas.map(c => c.id === conta.id ? { ...c, status: novoStatus, statusAnterior } : c);
 
@@ -218,22 +194,36 @@ export default function ContasPagar() {
             return;
         }
 
-        const res = await fetch(`http://localhost:4000/contasPagar/${conta.id}`, {
-            method: "PUT",
-            body: JSON.stringify({ status: novoStatus }),
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-        });
+        try {
+            const res = await fetch(`http://localhost:4000/contasPagar/${conta.id}`, {
+                method: "PUT",
+                body: JSON.stringify({ status: novoStatus }),
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
 
-        if (res.ok) {
-            showToast(`Conta marcada como ${novoStatus}!`, "success");
-        } else {
-            setContas(contas.map(c => (c.id === conta.id ? { ...c, status: statusAnterior } : c)));
+            if (!res.ok) {
+                throw new Error("Erro ao atualizar status");
+            }
+
+            const contaAtualizadaAPI: ContaFromAPI = await res.json();
+            const contaAtualizadaLocal = mapContaFromAPI(contaAtualizadaAPI, categorias);
+
+            const novasContas = contas.map(c => c.id === contaAtualizadaLocal.id ? { ...c, ...contaAtualizadaLocal } : c);
+            setContas(novasContas);
+            localStorage.setItem("contas", JSON.stringify(novasContas));
+
+            await syncTransacoes();
+            showToast("Conta editada com sucesso!", "success");
+        
+        } catch (err) {
+            console.error(err);
+            setContas(contas);
             localStorage.setItem("contas", JSON.stringify(contas));
-            const erro = await res.json();
-            showToast(erro.error || "Erro ao atualizar status", "danger");
+
+            showToast("Erro ao atualizar conta", "danger");
         }
     };
 
@@ -259,23 +249,13 @@ export default function ContasPagar() {
         try {
             const resConta = await fetch(`http://localhost:4000/contasPagar/${conta.id}`, {
                 method: "DELETE",
-                headers: { Authorization: `Bearer ${token}`}
+                headers: { Authorization: `Bearer ${token}` }
             });
 
             if (!resConta.ok) throw new Error("Erro ao deletar conta");
 
-            const resTransacao = await fetch(`http://localhost:4000/transacoes/conta/${conta.id}`, {
-                method: "DELETE",
-                headers: { Authorization: `Bearer ${token}` },
-            });
-
-            if (!resTransacao) {
-                console.warn("Transação não encontrada ou já deletada");
-            }
-
             setContas(prev => prev.filter(c => c.id !== conta.id));
-            setTransacoes(prev => prev.filter(t => t.contaId !== conta.id));
-
+            await syncTransacoes();
             showToast("Conta deletada com sucesso!", "success");
         } catch {
             showToast("Erro ao deletar conta", "danger");
@@ -324,28 +304,28 @@ export default function ContasPagar() {
     )
 
     const formatarDataParaBackend = (date: Date | string | null) => {
-    if (!date) return "";
-    const d = new Date(date);
-    const ano = d.getFullYear();
-    const mes = String(d.getMonth() + 1).padStart(2, "0");
-    const dia = String(d.getDate()).padStart(2, "0");
-    return `${ano}-${mes}-${dia}`;
-};
+        if (!date) return "";
+        const d = new Date(date);
+        const ano = d.getFullYear();
+        const mes = String(d.getMonth() + 1).padStart(2, "0");
+        const dia = String(d.getDate()).padStart(2, "0");
+        return `${ano}-${mes}-${dia}`;
+    };
 
     const parseDate = (dateString: string): Date => {
-    const datePart = dateString.split("T")[0];
-    const [ano, mes, dia] = datePart.split("-").map(Number);
-    return new Date(ano, mes - 1, dia); 
-};
+        const datePart = dateString.split("T")[0];
+        const [ano, mes, dia] = datePart.split("-").map(Number);
+        return new Date(ano, mes - 1, dia);
+    };
 
-const formatarDataParaExibir = (dateString: string): string => {
-    if (!dateString) return "Data inválida";
-    try {
-        return parseDate(dateString).toLocaleDateString("pt-BR");
-    } catch {
-        return "Data inválida";
-    }
-};
+    const formatarDataParaExibir = (dateString: string): string => {
+        if (!dateString) return "Data inválida";
+        try {
+            return parseDate(dateString).toLocaleDateString("pt-BR");
+        } catch {
+            return "Data inválida";
+        }
+    };
 
     return (
         <div className={styles.main}>
@@ -538,26 +518,14 @@ const formatarDataParaExibir = (dateString: string): string => {
                                                     throw new Error(erro.error || "Falha ao editar");
                                                 }
 
-                                                const contaAtualizada = await res.json();
-                                                const categoriaObj =
-                                                    contaAtualizada.categoria?.nome
-                                                        ? contaAtualizada.categoria
-                                                        : categorias.find(cat => cat.id === (editCategoriaId ?? selectedConta.categoriaId));
-
-                                                const novasContas = contas.map(c =>
-                                                    c.id === contaAtualizada.id
-                                                        ? {
-                                                            ...c,
-                                                            ...contaAtualizada,
-                                                            categoria: categoriaObj?.nome || c.categoria,
-                                                            categoriaId: categoriaObj?.id || c.categoriaId,
-                                                        }
-                                                        : c
-                                                );
+                                                const contaAtualizadaAPI: ContaFromAPI = await res.json();
+                                                const contaAtualizadaLocal = mapContaFromAPI(contaAtualizadaAPI, categorias);
+                                                const novasContas = contas.map(c => c.id === contaAtualizadaLocal.id ? contaAtualizadaLocal : c );
 
                                                 setContas(novasContas)
                                                 localStorage.setItem("contas", JSON.stringify(novasContas));
 
+                                                await syncTransacoes();
                                                 showToast("Conta editada com sucesso!", "success");
                                             } catch (err: unknown) {
                                                 const errorMessage = err instanceof Error ? err.message : "Erro ao editar conta";
