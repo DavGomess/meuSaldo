@@ -94,7 +94,7 @@ export default function Dashboard() {
                 </div>
                 <div className={styles.infoValoresDespesas}>
                     <h5 className="m-0">Despesas</h5>
-                    <p className='m-0'>R$ {formatarValor(totalDespesas, exibirAbreviado)}</p>
+                    <p className='m-0'>{formatarValor(totalDespesas, exibirAbreviado)}</p>
                 </div>
             </div>
             <div className={styles.containerGraficos}>
