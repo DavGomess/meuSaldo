@@ -11,6 +11,7 @@ router.use(authenticateToken);
 
 router.post("/", validateBody(createOrcamentoSchema), orcamentosController.upsert.bind(orcamentosController));
 router.get("/", orcamentosController.listar.bind(orcamentosController));
+router.put("/", orcamentosController.update.bind(orcamentosController));
 router.delete("/:categoriaId", orcamentosController.deletar.bind(orcamentosController));
 
 export default router;

@@ -1,7 +1,6 @@
 import CategoriaModal from "../components/CategoriaModal";
 import styles from "./orcamentos.module.css"
 import { useCategorias } from "../../contexts/CategoriaContext";
-import { useTransacoes } from "../../contexts/TransacoesContext";
 import { useOrcamentos } from "../../contexts/OrcamentosContext";
 import { useToast } from "../../contexts/ToastContext";
 import { useState } from "react";
@@ -11,8 +10,7 @@ import { formatarValor } from "../../utils/formatarValor";
 
 export default function Orcamento() {
     const { categorias } = useCategorias();
-    const { transacoes } = useTransacoes();
-    const { orcamentos, upsert, remover } = useOrcamentos();
+    const { orcamentos, sync, upsert, remover, update, calcularProgresso } = useOrcamentos();
     const { showToast } = useToast();
     const { exibirAbreviado } = useDisplayPreferences();
 
@@ -21,24 +19,15 @@ export default function Orcamento() {
     const [editandoOrcamentoId, setEditandoOrcamentoId] = useState<number | null>(null);
     const [valorInput, setValorInput] = useState<number | "">("");
 
+    const temOrcamentoAtivo = orcamentos.length > 0;
+    const estaEditando = editandoOrcamentoId !== null;
+
     const categoriaMap = new Map<string, number>();
     categorias.forEach(c => categoriaMap.set(c.nome, c.id));
 
-    const categoriasParaModal = {
+    const categoriasUsuario = {
         Receita: categorias.filter(c => c.tipo === "receita").map(c => c.nome),
         Despesa: categorias.filter(c => c.tipo === "despesa").map(c => c.nome),
-    };
-
-    const calcularProgresso = (categoriaId: number, limite: number) => {
-        const cat = categorias.find(c => c.id === categoriaId);
-        if (!cat) return { gasto: 0, restante: limite, porcentagem: 0, nome: "Desconhecida" };
-
-        const gasto = transacoes.filter(t => t.categoriaId === categoriaId).reduce((acc, t) => acc + t.valor, 0);
-
-        const porcentagem = limite > 0 ? (gasto / limite) * 100 : 0;
-        const restante = limite - gasto;
-
-        return { gasto, restante, porcentagem, nome: cat.nome };
     };
 
     const handleOpenCategoriaModal = () => setOpenModal("categoria");
@@ -57,27 +46,36 @@ export default function Orcamento() {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
+        const form = e.currentTarget;
         const categoriaId = categoriaMap.get(selectedCategoria);
-        if (!categoriaId) {
-            showToast("Selecione uma categoria válida", "danger");
+        if (!categoriaId || !form.valor.value) {
+            showToast("Preencha todos os campos", "danger");
             return;
         }
 
-        const valor = Number(e.currentTarget.valor.value);
+        const valor = Number(form.valor.value);
         if (valor <= 0) {
-            showToast("Informe um valor válido", "danger");
+            showToast("Valor deve ser maior que zero", "danger");
             return;
         }
 
         try {
-            await upsert(categoriaId, valor);
-            showToast("Orçamento salvo com sucesso!", "success");
-            e.currentTarget.reset();
+            if (editandoOrcamentoId) {
+                await update(categoriaId, valor);
+                showToast("Orçamento editado com sucesso!", "success");
+            } else {
+                await upsert(categoriaId, valor);
+                showToast("Orçamento criado com sucesso!", "success");
+            }
+
+            await sync();
+            form.reset();
             setSelectedCategoria("");
             setValorInput("");
             setEditandoOrcamentoId(null);
-        } catch {
-            showToast("Erro ao salvar orçamento", "danger");
+        } catch (error) {
+            const mensagem = error instanceof Error ? error.message : "Erro ao salvar orçamento";
+            showToast(mensagem, "danger");
         }
     };
 
@@ -93,6 +91,7 @@ export default function Orcamento() {
         if (!confirm("Tem certeza que deseja remover este orçamento?")) return;
         try {
             await remover(categoriaId);
+            await sync();
             showToast("Orçamento removido", "success");
         } catch {
             showToast("Erro ao remover", "danger");
@@ -101,8 +100,8 @@ export default function Orcamento() {
 
     const totalOrcado = orcamentos.reduce((acc, o) => acc + o.valor, 0);
     const totalGasto = orcamentos.reduce((acc, o) => {
-        const { gasto } = calcularProgresso(o.categoriaId, o.valor);
-        return acc + gasto;
+        const { gastoReal } = calcularProgresso(o.categoriaId);
+        return acc + gastoReal;
     }, 0);
     const saldoRestante = totalOrcado - totalGasto
 
@@ -131,18 +130,23 @@ export default function Orcamento() {
                     <div className={styles.grupoInputs}>
                         <div className={styles.inputCategoria}>
                             <label htmlFor="categoria">Categoria</label>
-                            <button type="button" onClick={handleOpenCategoriaModal}>
+                            <button type="button" onClick={handleOpenCategoriaModal} disabled={temOrcamentoAtivo && !estaEditando} style={{ color: "#757474ff" }}>
                                 {displayCategorias()}
                                 <i className="bi bi-chevron-down"></i>
                             </button>
                         </div>
                         <div className={styles.inputValor}>
                             <label htmlFor="valor">Valor do Orçamento</label>
-                            <input type="number" name="valor" placeholder="Insira um valor" value={valorInput} onChange={(e) => setValorInput(e.target.value === "" ? "" : Number(e.target.value))} />
+                            <input
+                                type="number"
+                                name="valor"
+                                placeholder="Insira um valor"
+                                disabled={temOrcamentoAtivo && !estaEditando}
+                                value={valorInput} onChange={(e) => setValorInput(e.target.value === "" ? "" : Number(e.target.value))} />
                         </div>
                         <div className={styles.inputButton}>
-                            <button type="submit" className={`btn ${editandoOrcamentoId ? "btn-success" : "btn-primary"}`}>
-                                {editandoOrcamentoId !== null ? "+ Salvar" : "+ Criar"}
+                            <button type="submit" className={`btn ${editandoOrcamentoId ? "btn-success" : "btn-primary"}`} disabled={temOrcamentoAtivo && !estaEditando}>
+                                {editandoOrcamentoId ? "+ Salvar" : "+ Criar"}
                             </button>
                         </div>
                     </div>
@@ -151,12 +155,14 @@ export default function Orcamento() {
 
             <div className={styles.containerOrcamento}>
                 {orcamentos.map((orcamento) => {
-                    const { gasto, restante, porcentagem, nome } = calcularProgresso(orcamento.categoriaId, orcamento.valor);
-                    const excedido = gasto > orcamento.valor;
+                    const { gastoReal, restante, porcentagem, concluido, } = calcularProgresso(orcamento.categoriaId);
+                    const cat = categorias.find(c => c.id === orcamento.categoriaId);
+                    const nome = cat?.nome ?? "Desconhecida";
+                    
                     return (
                         <div
                             key={orcamento.id}
-                            className={`${styles.cardOrcamento} ${excedido ? styles.cardOrcamentoExcedente : ""}`}
+                            className={`${styles.cardOrcamento} ${concluido ? styles.cardOrcamentoExcedente : ""}`}
                         >
                             <div className={styles.headerOrcamento}>
                                 <h5>{nome}</h5>
@@ -180,13 +186,13 @@ export default function Orcamento() {
                                 <div className={styles.progressBar}>
                                     <div
                                         className={styles.progressFill}
-                                        style={{ width: `${Math.min(porcentagem, 100)}%` }}
+                                        style={{ width: `${porcentagem}%` }}
                                     />
                                 </div>
 
                                 <div className={styles.infoGasto}>
                                     <h6>Gasto:</h6>
-                                    <p className="text-danger">{formatarValor(gasto, exibirAbreviado)}</p>
+                                    <p className="text-danger">{formatarValor(gastoReal, exibirAbreviado)}</p>
                                 </div>
 
                                 <div className={styles.infoOrcamento}>
@@ -199,13 +205,12 @@ export default function Orcamento() {
                                     <p className="text-success">{formatarValor(restante, exibirAbreviado)}</p>
                                 </div>
 
-                                {excedido && (
-                                    <div className={styles.infoMensagem}>
-                                        <h6>Orçamento Excedido!</h6>
+                                {concluido && (
+                                    <div className={styles.orcamentoConcluido}>
+                                        <h6>Orçamento concluído!</h6>
                                     </div>
                                 )}
                             </div>
-
                         </div>
                     );
                 })}
@@ -217,7 +222,8 @@ export default function Orcamento() {
                         multiple={false}
                         onClose={handleCloseModal}
                         onSelect={handleSelectCategoria}
-                        categorias={categoriasParaModal}
+                        categoriasUsuario={categoriasUsuario}
+                        selectedCategoria={selectedCategoria !== "" ? [selectedCategoria] : []}
                     />
                 )
             }

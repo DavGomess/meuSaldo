@@ -11,40 +11,54 @@ export class OrcamentosSerivice {
         if (!categoriaId || !valor || valor <= 0) {
             throw new Error("Categoria e valor positivo são obrigatórios.");
         }
+        
+        const orcamentoExistente = await prisma.orcamento.findFirst({
+            where: { userId }
+        });
 
-        const categoria = await prisma.categoria.findUnique({
-            where: { id: categoriaId, userId }
+        if (orcamentoExistente) {
+            throw new Error("Você já possui um orçamento ativo. Remova-o antes de criar outro.");
+        }
+
+        const categoria = await prisma.categoria.findFirst({
+            where: {
+                id: categoriaId,
+                OR: [
+                    { userId: userId },
+                    { userId: null } 
+                ]
+    }
         });
         if (!categoria) {
             throw new Error("Categoria não encontrada.");
         }
 
-        const orcamentoExistente = await prisma.orcamento.findFirst({
-            where: { userId, categoriaId }
-        })
-
-        let data;
-        let isCreated = false;
-
-        if (orcamentoExistente) {
-            data = await prisma.orcamento.update({
-                where: { id: orcamentoExistente.id },
-                data: { valor },
-                include: { categoria: true }
-            });
-        } else {
-            data = await prisma.orcamento.create({
-                data: { valor, userId, categoriaId },
-                include: { categoria: true }
-            });
-            isCreated = true;
-        }
+        const data = await prisma.orcamento.create({
+            data: { userId, categoriaId, valor },
+            include: { categoria: true }
+        });
 
         return {
             orcamento: this.toLocal(data),
-            isCreated
+            isCreated: true
         };  
     }
+
+    async update(categoriaId: number, valor: number, userId: number): Promise<OrcamentoLocal> {
+    const orcamento = await prisma.orcamento.findFirst({
+        where: { userId }
+    });
+
+    if (!orcamento) throw new Error("Orçamento não encontrado.");
+
+    const updated = await prisma.orcamento.update({
+        where: { id: orcamento.id },
+        data: { categoriaId, valor },
+        include: { categoria: true }
+    });
+
+    return this.toLocal(updated);
+}
 
     async listar(userId: number): Promise<OrcamentoLocal[]> {
         const orcamentos = await this.repository.listarPorUser(userId);

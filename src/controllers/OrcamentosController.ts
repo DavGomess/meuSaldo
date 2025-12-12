@@ -23,6 +23,20 @@ export class OrcamentosController {
         }
     }
 
+    async update(req: Request, res: Response) {
+        try {
+            const userId = req.user!.id;
+            const { categoriaId, valor } = req.body;
+
+            const orcamento = await service.update(categoriaId, valor, userId);
+
+            return res.status(200).json(orcamento);
+        } catch (e: unknown) {
+            const msg = e instanceof Error ? e.message : "Erro ao atualizar orçamento";
+            return res.status(400).json({ error: msg });
+        }
+}
+
     async listar(req: Request, res: Response) {
         try {
             const userId = req.user!.id;
