@@ -33,7 +33,7 @@ export const createContaPagarSchema = z.object({
     nome: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
     valor: z.number().positive("Valor deve ser positivo"),
     data: dateSchema,
-    categoriaId: z.number().int("categoriaId deve ser um número inteiro")
+    categoriaId: z.number().int().nullable().optional()
 });
 
 export const createOrcamentoSchema = z.object({
