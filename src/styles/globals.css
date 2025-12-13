@@ -4,6 +4,89 @@
     padding: 0;
 }
 
+:root {
+  --bg-color: #e1e7ef;
+  --text-color: #212529;
+  --card-bg: #fff;
+  --card-border: #ccc;
+  --hover-color: #e5e8f3;
+  --menu-color: #475569;
+  --menuHover-color: #ccf0d58c;
+  --icon-color: #000;
+  --input-bg: #eef2f7; 
+  --input-border: #cbd5e1;      
+  --input-text: #212529;       
+  --input-focus: #94a3b8;      
+  --li-shandow: #000000bf;
+  --categoriaMeta-color: #c8d7e6;
+  --metaConcluida-bg: #16a34a23;
+  --metaConcluida-color: #006400;
+  --metaConcluida-border: #00800047;
+  --prazoEncerrado-bg: #dc262623;
+  --prazoEncerrado-color: #ba0000;
+  --prazoEncerrado-border: #ff000047;
+  --orcamento-border: #049b0488;
+  --liContaPagar-hover: #e1ecf8;
+  --periodo-bg: #e3f7e6;       
+  --periodo-hover: #c9efcc;  
+  --periodo-active: #198754;
+  --btn-close-filter: invert(0%);
+}
+
+
+.dark-theme {
+  --bg-color: #1c1f26;
+  --text-color: #f8f9fa;
+  --card-bg: #16181d;
+  --card-border: #333;
+  --hover-color: #2a2d3a;
+  --menu-color: #94a3b8;
+  --menuHover-color: #1a3a2f80;
+  --icon-color: #fff;
+  --input-bg: #2a2d34;       
+  --input-border: #3f434b;      
+  --input-text: #f1f5f9;        
+  --input-focus: #38bdf8; 
+  --li-shandow: #ffffff67;
+  --categoriaMeta-color: #0d6efd;
+  --metaConcluida-bg: #16a34a26;
+  --metaConcluida-color: #4ade80;
+  --metaConcluida-border: #22c55e66;
+  --prazoEncerrado-bg: #dc262626;
+  --prazoEncerrado-color: #f87171;
+  --prazoEncerrado-border: #ef444466;
+  --orcamento-border: #22c55e66;
+  --liContaPagar-hover: #353841;  
+  --periodo-bg: #ddebe266;
+  --periodo-hover: #7fe0a226;
+  --periodo-active: #198754; 
+  --btn-close-filter: invert(100%);
+}
+
+.form-select {
+  appearance: none;          
+  -webkit-appearance: none;   
+  -moz-appearance: none;     
+  background-image: none !important; 
+}
+
+.form-select:disabled,
+input:disabled {
+  background-color: #e9ecef; 
+  color: #6c757d; 
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+
+.dark-theme .form-select:disabled,
+.dark-theme input:disabled {
+  background-color: #2b2f36;  
+  color: #9ca3af; 
+  border-color: #3a3f47;
+}
+
+
 hr {
     font-weight: 100;
 }
@@ -16,46 +99,73 @@ hr {
     gap: 0.5rem;
 }
 
-.main {
-    display: flex;
-    height: 100vh;
-    width: 100vw;
-    font-family: var(--font-poppins), sans-serif;
-    font-weight: 700;
-    
-}
-
+.mainPage {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  font-family: var(--font-poppins), sans-serif;
+  font-weight: 700; 
+    }
 
 .menuLateral {
-    width: 17rem;
-    border: 1px solid #ccc;
-} 
+    width: 14rem;
+    flex-shrink: 0;
+    border-right: 1px solid var(--card-border);
+    transition: width 0.1s linear; 
+    background-color: var(--card-bg);
+}
+
+.menuLateral.collapsed {
+    width: 5rem;
+}
 
 .logo {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 0.5rem;
     width: 100%;
     font-size: 1.5rem;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid var(--card-border);
+    padding: 0.5rem 1rem;
+    height: 4.5rem; 
+}
+
+.titleApp {
+  margin: 0;
+  padding: 0;
+  color: var(--text-color);
 }
 
 .menuIcon {
     border-radius: 0.5rem;
-    padding: 0.3rem 0.5rem;
+    padding: 0rem 0.1rem;
     cursor: pointer;
-    font-size: 1.2rem;
-    margin-left: 0.5rem;
+    font-size: 1rem;
 }
 
-.menuIcon:hover {
-    cursor: pointer;
-    background-color: rgb(229, 232, 243);
-}
 
-.menuIcon-strong {
+.menuIconStrongRight,
+.menuIconStrongleft {
     text-shadow: 0 0 0.5px currentColor;
+    color: var(--text-color);
+    padding: 0.5rem 0.5rem;
+    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    transition: background-color 0.2s ease;
+}
+
+.menuIconStrongRight:hover,
+.menuIconStrongleft:hover {
+    cursor: pointer;
+    background-color: var(--hover-color);
+}
+
+.menuIconStrongRight {
+  border: 0.5px solid var(--card-border);
+  border-radius: 50%;
+  padding: 0.75rem;
 }
 
 .opcoesMenuLateral {
@@ -63,43 +173,61 @@ hr {
     justify-content: center;
     align-items: center;
     margin-top: 1rem;
-
+    flex-direction: column;
 }
 
 .opcoesMenuLateral li {
     list-style: none;
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
-    font-size: 0.9rem;
+    font-size: 1rem;
     margin: 0.3rem;
-    color: rgb(71, 85, 105);
-
+    color: var(--menu-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 li.active {
-    background-color: #1f873c;
-    color: rgb(255, 255, 255);
+    background-color: #198754 !important;
+    color: #fff;
 }
 
 li.noActive:hover {
-    background-color: #ccf0d58c;
+    background-color: var(--menuHover-color);
     cursor: pointer;
 }
 
+.opcoesMenuLateral i {
+    font-size: 1.2rem;
+    transition: font-size 0.3s ease;
+}
 
 
-.container {
-    width: 100vw;
-    height: 100vh;
-    background-color: hsla(214, 32%, 91%, 1);
+.opcoesMenuLateral span {
+    margin-left: 0.5rem;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+    white-space: nowrap; 
+}
+
+
+.mainContainer {
+  flex: 1;
+  display: flex;
+  min-width: 0; 
+  flex-direction: column;
+  transition: all 0.1s linear;
+  background-color: #e1e7ef;
+  background-color: var(--bg-color);
 }
 
 .header {
     height: 5rem;
-    background-color: #fff;
+    background-color: var(--card-bg);
+    color: var(--text-color);
     padding: 0.5rem 1rem;    
     display: flex;
     gap: 1rem;
+    width: auto;
 }
 
 .header h1 {
@@ -108,15 +236,15 @@ li.noActive:hover {
 }
 
 .header p {
-    font-size: 0.8rem;
-    color: rgb(71, 85, 105);
+    font-size: 0.9rem;
+    color: rgb(102, 126, 158);
     font-weight: 500;
 }
 
 .header i {
-    border: 1px solid green;
+    border: 1px solid #198754;
     color: #fff;
-    background-color: #1f873c;
+    background-color: #198754;
     font-size: 2rem;
     width: 3rem;
     height: 3rem;
@@ -124,6 +252,17 @@ li.noActive:hover {
     align-items: center;
     justify-content: center;
     border-radius: 0.5rem;
+}
+
+.headerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.headerInfo h1, .headerInfo p {
+  margin: 0;
+  padding: 0;
 }
 
 .modalList {
@@ -136,16 +275,41 @@ li.noActive:hover {
     max-height: 10rem;
 }
 
+.modalList::-webkit-scrollbar {
+    width: 0.5rem; 
+}
+
+.modalList::-webkit-scrollbar-track {
+    background-color: var(--card-bg);
+}
+
+.modalList::-webkit-scrollbar-thumb {
+    background-color: #828681; 
+    border-radius: 0.5rem;
+}
+
+.modalList::-webkit-scrollbar-thumb:hover {
+    background-color: #828681c9; 
+}
+
+
 .modalItem {
-    background-color: #d5e0d8;
+    background-color: var(--periodo-bg) !important;
     list-style: none;
     padding: 0.5rem 1rem;
     border-radius: 1rem;
 }
 
-.liModalAtivo {
-    background-color: #1f873c;
-    color: #fff;
+
+.modalItem:hover {
+  background-color: var(--periodo-hover) !important;
+  cursor: pointer;
+}
+
+.modalItem.active {
+  background-color: var(--periodo-active) !important;
+  color: #fff !important;
+  font-weight: 600;
 }
 
 .react-datepicker {
@@ -155,7 +319,7 @@ li.noActive:hover {
   font-family: "Inter", sans-serif;
   width: 20rem !important;
   height: 21rem !important;
-  max-width: 100% !important;  
+  max-width: 100% !important;   
 }
 
 .react-datepicker__month {
@@ -196,7 +360,6 @@ li.noActive:hover {
 
 .react-datepicker__navigation:hover {
   background: #edf1f8; 
-;
 }
 
 .react-datepicker__navigation-icon::before {
@@ -209,7 +372,6 @@ li.noActive:hover {
 .react-datepicker__day-names {
   display: grid !important;
   grid-template-columns: repeat(7, 1fr);
-  margin: 0 0.4rem;
   width: 100%;
   background-color: #e9e7e7 ;
   }
@@ -222,7 +384,6 @@ li.noActive:hover {
   font-weight: 500;
   color: #9ca3af;
   text-align: center !important; 
-  
 }
 
 .react-datepicker__week {
@@ -266,8 +427,11 @@ li.noActive:hover {
 .react-datepicker__day--outside-month {
   color: #c5c6c7 !important;
   font-weight: 400 !important;
-}
+} 
 
+li .btn {
+  border: none;
+}
 
 .iconTrash {
     width: 2.5rem;
@@ -327,3 +491,24 @@ li.noActive:hover {
     justify-content: center;
     font-size: 1.3rem;
 }
+
+.modal-content {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--card-border) !important;
+  color: var(--text-color) !important;
+}
+
+.modal-header button {
+  color: red !important;
+}
+
+.modal-header button:hover {
+  color: red !important;
+}
+
+.btn-close {
+  filter: var(--btn-close-filter) !important;
+  opacity: 0.8;
+}
+
+
