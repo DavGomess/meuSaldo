@@ -4,20 +4,27 @@ import { StatusConta } from "../utils/status";
 export interface CriarContaInput {
     nome: string;
     valor: number;
-    categoriaId?: number;
+    categoriaId?: number | null;
     data: string;
     status: StatusConta;
+}
+
+export interface PayloadEdicao {
+    nome: string;
+    valor: number;
+    data: string;
+    categoriaId?: number | null;
 }
 
 export interface ContaLocal {
     id: number; 
     nome: string;
     valor: number;
-    categoria: string;
+    categoria?: string;
     categoriaId: number | null;
     data: string;
     status: StatusConta;
-    statusAnterior?: StatusConta;
+    statusAnterior?: string | StatusConta;
 }
 
 
@@ -54,7 +61,9 @@ export type TransacaoFromAPI = Prisma.TransacaoGetPayload<{
         categoria: true;
         conta: true;
     };
-}>;
+}> & {
+    nome?: string;
+};
 
 export type TransacaoTipo = "receita" | "despesa";
 export type TransacaoStatus = "pendente" | "paga" | "vencida";
@@ -68,14 +77,14 @@ export interface TransacaoLocal {
     status: TransacaoStatus;
     categoria: string;
     categoriaId: number | null;
-    contaNome: string;
-    contaId: number;
+    contaId: number | null;
     nome: string;
 }
 
 export type CategoriaFromAPI = Prisma.CategoriaGetPayload<true>;
 
 export interface CategoriaLocal {
+    userId: number | null;
     id:number;
     nome: string;
     tipo: "receita" | "despesa";
@@ -110,7 +119,7 @@ export interface MetaLocal {
     id: number;
     titulo: string;
     categoriaId: number | null;
-    valor: number;  
+    valorAlvo: number;  
     valorAtual: number;
     prazo: string;   
 }
