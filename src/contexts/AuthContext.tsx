@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { getToken } from "@/utils/authToken";
 
 interface User {
     id: number;
@@ -29,8 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         const verificarToken = async () => {
-            const token = sessionStorage.getItem("token");
-
+            const token = getToken();
             if (!token) {
                     setUser(null);
                     setLoading(false);
@@ -39,18 +39,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             try {
                 const res = await fetch(`${API_URL}/auth/me`, {
-                    headers: { Authorization: `Bearer ${token}` },
+                    headers: { Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
                 });
                 if (res.ok) {
                     const data = await res.json();
-                    setUser(data.user);
+                    setUser(data);
                 } else {
                     sessionStorage.removeItem("token");
+                    localStorage.removeItem("token");
                     setUser(null);
                 }
             } catch (err) {
                 console.error("Token inválido ou expirado", err);
                 sessionStorage.removeItem("token");
+                localStorage.removeItem("token");
                 setUser(null);
             } finally {
                 setLoading(false);
@@ -58,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
 
         verificarToken();
-    }, []);
+    }, [API_URL]);
 
 
     const login = async (email: string, senha: string): Promise<boolean> => {
@@ -73,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             if (data.token && data.user) {
                 sessionStorage.setItem("token", data.token);
+                localStorage.setItem("token", data.token);
                 setUser(data.user);
                 return true;
             }
@@ -99,6 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const logout = () => {
         sessionStorage.removeItem("token");
+        localStorage.removeItem("token");
         setUser(null);
         router.push("/login");
     };
