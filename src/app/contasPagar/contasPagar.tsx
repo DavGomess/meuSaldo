@@ -10,6 +10,7 @@ import { useTransacoes } from "../../contexts/TransacoesContext";
 import { useToast } from "../../contexts/ToastContext";
 import { ContaFromAPI } from "../../types";
 import { mapContaFromAPI } from "@/utils/mapConta";
+import { getToken } from "@/utils/authToken";
 
 export default function ContasPagar() {
     const { categorias } = useCategorias();
@@ -48,7 +49,7 @@ export default function ContasPagar() {
 
     useEffect(() => {
         const carregarContas = async () => {
-            const token = sessionStorage.getItem("token");
+            const token = getToken();
             if (!token) return;
 
             try {
@@ -102,7 +103,7 @@ export default function ContasPagar() {
             data: formatarDataParaBackend(novaData)
         };
 
-        const token = sessionStorage.getItem("token");
+        const token = getToken();
         if (!token) {
             showToast("Token não encontrado", "danger");
             return;
@@ -188,7 +189,7 @@ export default function ContasPagar() {
         setContas(contasAtualizadas);
         localStorage.setItem("contas", JSON.stringify(contasAtualizadas))
 
-        const token = sessionStorage.getItem("token");
+        const token = getToken();
         if (!token) {
             showToast("Erro: token não encontrado", "danger");
             return;
@@ -243,7 +244,7 @@ export default function ContasPagar() {
     };
 
     const deletarConta = async (conta: ContaLocal) => {
-        const token = sessionStorage.getItem("token");
+        const token = getToken();
         if (!token) return;
 
         try {
@@ -497,7 +498,7 @@ export default function ContasPagar() {
                                                 payload.categoriaId = editCategoriaId;
                                             }
 
-                                            const token = sessionStorage.getItem("token");
+                                            const token = getToken();
                                             if (!token) {
                                                 showToast("Token não encontrado", "danger");
                                                 return;
