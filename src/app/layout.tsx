@@ -3,14 +3,15 @@ import { Poppins, Geist_Mono } from "next/font/google";
 import "@/styles/globals.css";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { SelectedProvider } from "@/contexts/SelectedContext";
-import { CategoriaProvider } from "@/contexts/CategoriaContext";
-import { TransacoesProvider } from "@/contexts/TransacoesContext";
-import { OrcamentosProvider } from "@/contexts/OrcamentosContext";
-import { MetasProvider } from "@/contexts/MetasContext";
-import { ToastProvider } from "@/contexts/ToastContext";
-import { ThemeProvider } from "@/contexts/ThemeContext";
-import { DisplayPreferencesProvider } from "@/contexts/DisplayPreferencesContext";
+import { SelectedProvider } from "src/contexts/SelectedContext";
+import { CategoriaProvider } from "src/contexts/CategoriaContext";
+import { TransacoesProvider } from "src/contexts/TransacoesContext";
+import { OrcamentosProvider } from "src/contexts/OrcamentosContext";
+import { MetasProvider } from "src/contexts/MetasContext";
+import { ToastProvider } from "src/contexts/ToastContext";
+import { ThemeProvider } from "src/contexts/ThemeContext";
+import { DisplayPreferencesProvider } from "src/contexts/DisplayPreferencesContext";
+import { AuthProvider } from "src/contexts/AuthContext";
 
 
 const poppins = Poppins({
@@ -40,6 +41,7 @@ export default function RootLayout({
         <SelectedProvider>
           <ToastProvider>
             <ThemeProvider>
+            <AuthProvider>
               <DisplayPreferencesProvider>
                 <CategoriaProvider>
                   <TransacoesProvider>
@@ -51,6 +53,7 @@ export default function RootLayout({
                   </TransacoesProvider>
                 </CategoriaProvider>
               </DisplayPreferencesProvider>
+              </AuthProvider>
             </ThemeProvider>
           </ToastProvider>
         </SelectedProvider>
