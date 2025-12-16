@@ -41,22 +41,25 @@ export class AuthService {
 
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: "7d" });
 
-    return {token, user: { email: user.email }}
+    return {token, user: { id: user.id, email: user.email }}
 }
 
     static async requestPasswordReset(email: string) {
-    if (!email) throw new Error("E-mail obrigatório");
+    if (!email) {
+        return { message: "Se o e-mail existir, um link será enviado" };
+    }
 
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) throw new Error("Usuário não encontrado");
+    if (user) {
+        const token = jwt.sign({ userId: user.id }, JWT_RESET_SECRET, { expiresIn: "15m" });
+        await prisma.user.update({ where: { id: user.id }, data: { resetPasswordToken: token, resetPasswordExpires: new Date(Date.now() + 15 * 60 * 1000) }});
 
-    const token = jwt.sign({ userId: user.id }, JWT_RESET_SECRET, { expiresIn: "15m" });
+        const resetLink = `${process.env.FRONTEND_URL}/redefinirSenha?token=${token}`;
+        
+        await sendResetPasswordEmail(email, resetLink);
+    }
 
-    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
-
-    await sendResetPasswordEmail(email, resetLink);
-
-    return { message: "E-mail de recuperação enviado" };
+    return { message: "Se o e-mail existir, um link será enviado" };
 }
 
     static async resetPassword(token: string, newPassword: string) {
@@ -71,10 +74,28 @@ export class AuthService {
         throw new Error("Token inválido ou expirado");
     }
 
+    const user = await prisma.user.findFirst({
+        where: {
+            id: payload.userId,
+            resetPasswordToken: token,
+            resetPasswordExpires: {
+                gt: new Date()
+            }
+        }
+    });
+
+    if (!user) {
+        throw new Error("Token inválido ou já utilizado");
+    }
+
     const hashed = await bcrypt.hash(newPassword, 10);
     await prisma.user.update({
-        where: { id: payload.userId },
-        data: { password: hashed },
+        where: { id: user.id },
+        data: { 
+            password: hashed,
+            resetPasswordToken: null,
+            resetPasswordExpires: null
+        },
     });
 
     return { message: "Senha redefinida com sucesso" };
