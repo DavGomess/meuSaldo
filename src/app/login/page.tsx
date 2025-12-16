@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
 import styles from "./login.module.css";
@@ -16,12 +16,13 @@ export default function Login() {
     const [senha, setSenha] = useState("");
     const [loading, setLoading] = useState(false);
 
-    if (authLoading) return null;
-    if (user) {
-        setTimeout(() => router.replace("/"), 0); 
-        return null;
-    }
+    useEffect(() => {
+        if (!authLoading && user) {
+            router.replace("/");
+        }
+    }, [authLoading, user, router]);
 
+    if (authLoading) return null;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
