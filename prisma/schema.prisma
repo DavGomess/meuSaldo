@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -14,12 +13,94 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model ContasPagar {
-  id Int @id @default(autoincrement())
-  nome String
-  valor Float
-  categoria String
-  data DateTime
-  status    String  @default("pendente")
+  id        Int      @id @default(autoincrement())
+  nome      String
+  valor     Float
+  categoriaId Int?
+  categoria   Categoria? @relation(fields: [categoriaId], references: [id])
+  data      DateTime @db.Date
+  status    String   @default("pendente")
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  transacoes  Transacao[] @relation("ContaParaTransacao")
+  @@index([userId])
+}
+
+model User {
+  id          Int           @id @default(autoincrement())
+  email       String        @unique
+  password    String
+  createdAt   DateTime      @default(now())
+  resetPasswordToken   String?
+  resetPasswordExpires DateTime?
+  contasPagar ContasPagar[]
+  categoria   Categoria[]
+  transacoes  Transacao[]
+  orcamentos  Orcamento[]
+  metas       Meta[]
+}
+
+model Categoria {
+  id     Int    @id @default(autoincrement())
+  nome   String @unique
+  tipo   String
+  userId Int?
+  user   User?   @relation(fields: [userId], references: [id])
+  contasPagar ContasPagar[]
+  transacoes Transacao[]
+  orcamentos Orcamento[]
+  metas      Meta[]
+  @@unique([nome, userId])
+}
+
+model Transacao {
+  id          Int        @id @default(autoincrement())
+  valor       Float
+  tipo        String
+  data        DateTime   @db.Date
+  status      String
+  userId      Int
+  user        User       @relation(fields: [userId], references: [id])
+  categoriaId Int?
+  contaId     Int?
+  categoria   Categoria? @relation(fields: [categoriaId], references: [id])
+  conta       ContasPagar? @relation("ContaParaTransacao", fields: [contaId], references: [id], onDelete: Cascade)
+  @@index([userId])
+}
+
+
+enum TransacaoTipo {
+    receita
+    despesa
+}
+
+enum TransacaoStatus {
+    pendente
+    paga
+    vencida
+}
+
+model Orcamento {
+  id          Int        @id @default(autoincrement())
+  valor       Float
+  userId      Int
+  user        User       @relation(fields: [userId], references: [id])
+  categoriaId Int
+  categoria   Categoria? @relation(fields: [categoriaId], references: [id])
+  @@unique([userId, categoriaId])
+  @@index([userId])
+}
+
+model Meta {
+  id          Int        @id @default(autoincrement())
+  titulo      String
+  valorAlvo       Float
+  valorAtual  Float      @default(0)
+  prazo       DateTime @db.Date
+  userId      Int
+  user        User       @relation(fields: [userId], references: [id])
+  categoriaId Int?
+  categoria   Categoria? @relation(fields: [categoriaId], references: [id])
+  @@index([userId])
 }

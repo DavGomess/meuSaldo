@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Meta" ALTER COLUMN "prazo" SET DATA TYPE DATE;
