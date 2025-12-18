@@ -3,7 +3,7 @@ import styles from "./contasPagar.module.css"
 import { ContaLocal, PayloadEdicao } from "../../types";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { StatusConta } from "../../utils/status";
+import { StatusConta, definirStatus } from "../../utils/status";
 import { useCategorias } from "../../contexts/CategoriaContext";
 import CategoriaModal from "../components/CategoriaModal";
 import { useTransacoes } from "../../contexts/TransacoesContext";
@@ -165,26 +165,9 @@ export default function ContasPagar() {
     };
 
     const toggleStatus = async (conta: ContaLocal) => {
-        const statusAnterior = conta.status;
-        let novoStatus: StatusConta;
+        const novoStatus: StatusConta = conta.status === "paga" ? definirStatus(conta.data) : "paga";
 
-        if (statusAnterior === "pendente" || statusAnterior === "vencida") {
-            novoStatus = "paga";
-        } else if (statusAnterior === "paga") {
-            const anterior = conta.statusAnterior;
-
-            if (anterior === "paga" || anterior === "pago") {
-                novoStatus = "paga";
-            } else if (anterior === "vencida" || anterior === "vencido") {
-                novoStatus = "vencida";
-            } else {
-                novoStatus = "pendente";
-            }
-        } else {
-            novoStatus = "pendente";
-        }
-
-        const contasAtualizadas = contas.map(c => c.id === conta.id ? { ...c, status: novoStatus, statusAnterior } : c);
+        const contasAtualizadas = contas.map(c => c.id === conta.id ? { ...c, status: novoStatus } : c);
 
         setContas(contasAtualizadas);
         localStorage.setItem("contas", JSON.stringify(contasAtualizadas))
@@ -209,13 +192,6 @@ export default function ContasPagar() {
                 throw new Error("Erro ao atualizar status");
             }
 
-            const contaAtualizadaAPI: ContaFromAPI = await res.json();
-            const contaAtualizadaLocal = mapContaFromAPI(contaAtualizadaAPI, categorias);
-
-            const novasContas = contas.map(c => c.id === contaAtualizadaLocal.id ? { ...c, ...contaAtualizadaLocal } : c);
-            setContas(novasContas);
-            localStorage.setItem("contas", JSON.stringify(novasContas));
-
             await syncTransacoes();
             showToast("Conta editada com sucesso!", "success");
         
@@ -223,7 +199,6 @@ export default function ContasPagar() {
             console.error(err);
             setContas(contas);
             localStorage.setItem("contas", JSON.stringify(contas));
-
             showToast("Erro ao atualizar conta", "danger");
         }
     };
