@@ -15,7 +15,7 @@ describe("Resetar senha", () => {
             .send({ email: "reset@test.com" });
 
         expect(res.status).toBe(200);
-        expect(res.body.message).toBe("E-mail de recuperação enviado");
+        expect(res.body.message).toBe("Se o e-mail existir, um link será enviado");
     })
 
     it("POST /auth/reset-password → 400 se email inválido", async () => {
