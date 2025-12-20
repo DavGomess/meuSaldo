@@ -14,7 +14,8 @@ jobs:
     services:
       postgres:
         image: postgres:15
-        ports: [5432:5432]
+        ports: 
+          -5432:5432
         env:
           POSTGRES_USER: user
           POSTGRES_PASSWORD: password
@@ -54,7 +55,7 @@ jobs:
           PGPASSWORD: password
         run: |
           for i in {1..30}; do
-            if pg_isready -h localhost -p 5432 -U user >/dev/null 2>&1; then
+            if pg_isready -h postgres -p 5432 -U user >/dev/null 2>&1; then
               echo "PostgreSQL está pronto!"
               exit 0
             fi
@@ -64,7 +65,10 @@ jobs:
           echo "Falha: PostgreSQL não ficou pronto após ~150 segundos"
           exit 1
 
-      - name: Prisma generate
+      - name: Remover .env local (evitar conflitos)
+        run: rm -f .env || true
+
+      - name: Gerar Prisma Client
         run: npx prisma generate
 
       - name: Rodar migrations
