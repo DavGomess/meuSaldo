@@ -18,8 +18,10 @@ jobs:
           POSTGRES_USER: user
           POSTGRES_PASSWORD: password
           POSTGRES_DB: db
+        ports:
+          - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U user -d db"
+          --health-cmd="pg_isready -U user"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=10
@@ -50,14 +52,14 @@ jobs:
       - name: Aguardar PostgreSQL estar pronto
         run: |
           for i in {1..30}; do
-            if pg_isready -h localhost -p 5432 -U user -d db; then
+            if pg_isready -h localhost -p 5432 -U user; then
               echo "PostgreSQL está pronto!"
               exit 0
             fi
             echo "Tentativa $i: PostgreSQL ainda não está pronto..."
-            sleep 3
+            sleep 5
           done
-          echo "Falha: PostgreSQL não ficou pronto após 90 segundos"
+          echo "Falha: PostgreSQL não ficou pronto após 100 segundos"
           exit 1
         env:
           PGPASSWORD: password
