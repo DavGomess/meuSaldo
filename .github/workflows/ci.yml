@@ -21,10 +21,10 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U user"
+          --health-cmd="pg_isready -U user -d db"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=5
+          --health-retries=10
 
     env:
       NODE_ENV: test
@@ -48,6 +48,21 @@ jobs:
 
       - name: Prisma generate
         run: npx prisma generate
+
+      - name: Aguardar PostgreSQL estar pronto
+        run: |
+          for i in {1..30}; do
+            if pg_isready -h localhost -p 5432 -U user; then
+              echo "PostgreSQL está pronto!"
+              exit 0
+            fi
+            echo "Aguardando PostgreSQL... tentativa $i"
+            sleep 2
+          done
+          echo "PostgreSQL não ficou pronto a tempo"
+          exit 1
+        env:
+          PGPASSWORD: password
 
       - name: Rodar migrations
         run: npx prisma migrate deploy
