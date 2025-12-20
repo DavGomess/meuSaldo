@@ -12,6 +12,9 @@ beforeAll(async () => {
 });
 
 afterEach(async () => {
+    if (process.env.NODE_ENV === "test") {
+        return;
+    }
 
     await prisma.meta.deleteMany();
     await prisma.orcamento.deleteMany();
