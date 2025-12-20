@@ -29,7 +29,7 @@ jobs:
     env:
       NODE_ENV: test
       CI: "true"
-      DATABASE_URL: "postgresql://user:password@localhost:5432/db"
+      DATABASE_URL: "postgresql://user:password@postgres:5432/db"
       JWT_SECRET: "ci-secret"
       JWT_RESET_SECRET: "ci-reset-secret"
       NEXT_PUBLIC_API_URL: "http://localhost:4000"
@@ -76,6 +76,10 @@ jobs:
 
       - name: Esperar banco estabilizar
         run: sleep 5
+
+      - name: Testar conexão com banco
+        run: |
+          PGPASSWORD=password psql -h postgres -U user -d db -c "SELECT 1;"
 
       - name: Rodar testes (Jest)
         run: npm test
