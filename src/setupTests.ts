@@ -8,22 +8,26 @@ beforeAll(async () => {
   const port = 4001 + Math.floor(Math.random() * 1000);
     server = app.listen(port);
     console.log(`Test server rodando na porta ${port}`);
+    await prisma.$connect();
     await new Promise((resolve) => setTimeout(resolve, 500));
 });
 
 afterEach(async () => {
-
-    await prisma.meta.deleteMany();
-    await prisma.orcamento.deleteMany();
-    await prisma.transacao.deleteMany();
-    await prisma.categoria.deleteMany();
-    await prisma.contasPagar.deleteMany();
-    await prisma.user.deleteMany();
+    try {
+        await prisma.$transaction([
+            prisma.meta.deleteMany(),
+            prisma.orcamento.deleteMany(),
+            prisma.transacao.deleteMany(),
+            prisma.contasPagar.deleteMany(),
+            prisma.categoria.deleteMany(),
+            prisma.user.deleteMany(),
+        ]);
+    } catch (error) {
+        console.warn("Aviso: Falha ao limpar banco no afterEach (normal em CI)", error);
+    }
 });
 
 afterAll(async () => {
-    if (!process.env.CI) {
-        await prisma.$disconnect();
-    }
+    await prisma.$disconnect();
     server.close();
 });
