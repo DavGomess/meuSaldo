@@ -4,6 +4,9 @@ import app from "./app";
 
 let server: Server;
 
+console.log("✅ JWT_SECRET length:", process.env.JWT_SECRET?.length || "undefined");
+console.log("✅ JWT_RESET_SECRET length:", process.env.JWT_RESET_SECRET?.length || "undefined");
+
 beforeAll(async () => {
   const port = 4001 + Math.floor(Math.random() * 1000);
     server = app.listen(port);
@@ -17,7 +20,6 @@ beforeAll(async () => {
 });
 
 afterEach(async () => {
-    if (process.env.CI === "true") return;
 
     await prisma.meta.deleteMany();
     await prisma.orcamento.deleteMany();

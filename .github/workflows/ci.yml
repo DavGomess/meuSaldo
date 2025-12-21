@@ -33,6 +33,7 @@ jobs:
       JWT_SECRET: "a1b2c3d4e5f67890abcdef1234567890abcdef1234567890abcdef1234567890"
       JWT_RESET_SECRET: "f9e8d7c6b5a4938271645f3e2d1c0b9a8f7e6d5c4b3a2918273645f3e2d1c0b9"
       NEXT_PUBLIC_API_URL: "http://localhost:4000"
+      FRONTEND_URL: http://localhost:3000
 
     steps:
       - name: Checkout do código
@@ -79,10 +80,16 @@ jobs:
         run: |
           echo "JWT_SECRET set? $([[ -n \"$JWT_SECRET\" ]] && echo ✅ || echo ❌)"
           echo "JWT_RESET_SECRET set? $([[ -n \"$JWT_RESET_SECRET\" ]] && echo ✅ || echo ❌)"
+          echo "📏 JWT_RESET_SECRET length: ${#JWT_RESET_SECRET}"
 
+      - name: Mostrar envs críticas (sanitizadas)
+        run: |
+          echo "DATABASE_URL=$DATABASE_URL"
+          echo "NODE_ENV=$NODE_ENV"
+          echo "FRONTEND_URL=$FRONTEND_URL"
 
       - name: Rodar testes (Jest)
-        run: npm test
+        run: npm test -- --runInBand --detectOpenHandles --forceExit
 
       - name: lint (EsLint)
         run: npm run lint

@@ -6,6 +6,7 @@ import { JwtPayload } from "@/types";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 const JWT_RESET_SECRET = process.env.JWT_RESET_SECRET as string;
+ console.log("⚙️ CI JWT_RESET_SECRET length:", process.env.JWT_RESET_SECRET?.length || "undefined");
 
 export class AuthService {
     static async register({ email, password }: { email: string; password: string }) {
@@ -51,6 +52,7 @@ export class AuthService {
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (user) {
+         console.log("DEBUG JWT_RESET_SECRET:", JWT_RESET_SECRET?.slice(0, 10) || "undefined");
         const token = jwt.sign({ userId: user.id }, JWT_RESET_SECRET, { expiresIn: "15m" });
         await prisma.user.update({ where: { id: user.id }, data: { resetPasswordToken: token, resetPasswordExpires: new Date(Date.now() + 15 * 60 * 1000) }});
 
