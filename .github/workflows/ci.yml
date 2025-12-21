@@ -22,9 +22,9 @@ jobs:
           POSTGRES_DB: db
         options: >-
           --health-cmd="pg_isready -U user -d db"
-          --health-interval=15s
-          --health-timeout=10s
-          --health-retries=20
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=30
 
     env:
       NODE_ENV: test
@@ -46,28 +46,6 @@ jobs:
 
       - name: Instalar dependências
         run: npm ci
-      
-      - name: Instalar cliente PostgreSQL (para pg_isready)
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
-
-      - name: Aguardar PostgreSQL estar pronto
-        env:
-          PGPASSWORD: password
-        run: |
-          sleep 20 
-          for i in {1..40}; do
-            if pg_isready -h postgres -p 5432 -U user >/dev/null 2>&1; then
-              echo "PostgreSQL está pronto!"
-              exit 0
-            fi
-            echo "Tentativa $i: PostgreSQL ainda não está pronto..."
-            sleep 5
-          done
-          echo "Falha: PostgreSQL não ficou pronto após ~200 segundos"
-          exit 1
-
-      - name: Remover .env local (evitar conflitos)
-        run: rm -f .env || true
 
       - name: Gerar Prisma Client
         run: npx prisma generate
@@ -76,11 +54,7 @@ jobs:
         run: npx prisma migrate deploy
 
       - name: Esperar banco estabilizar
-        run: sleep 5
-
-      - name: Testar conexão com banco
-        run: |
-          PGPASSWORD=password psql -h postgres -U user -d db -c "SELECT 1;"
+        run: sleep 10
 
       - name: Rodar testes (Jest)
         run: npm test
