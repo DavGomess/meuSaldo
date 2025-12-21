@@ -1,6 +1,12 @@
 import nodemailer from "nodemailer";
 
 export async function sendResetPasswordEmail(to: string, resetLink: string) {
+    if (process.env.CI === "true") {
+    console.log(`📨 [CI] Mock de envio de e-mail de reset para: ${to}`);
+    console.log(`🔗 [CI] Link de redefinição: ${resetLink}`);
+    return;
+    }
+    
     const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
