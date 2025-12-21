@@ -22,9 +22,9 @@ jobs:
           POSTGRES_DB: db
         options: >-
           --health-cmd="pg_isready -U user -d db"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=10
+          --health-interval=15s
+          --health-timeout=10s
+          --health-retries=20
 
     env:
       NODE_ENV: test
@@ -54,6 +54,7 @@ jobs:
         env:
           PGPASSWORD: password
         run: |
+          sleep 10 
           for i in {1..30}; do
             if pg_isready -h postgres -p 5432 -U user >/dev/null 2>&1; then
               echo "PostgreSQL está pronto!"
