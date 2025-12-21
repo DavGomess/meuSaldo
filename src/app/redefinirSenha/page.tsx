@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import styles from "./redefinirSenha.module.css";
 import Link from "next/link";
 import { useToast } from "../../contexts/ToastContext"
@@ -55,7 +55,8 @@ export default function RedefinirSenha() {
     const isDisabled = loading || senha.trim() === "" || confirmarSenha.trim() === "";
 
     return (
-        <div className={styles.container}>
+        <Suspense fallback={<div>Carregando...</div>}>
+            <div className={styles.container}>
             <form onSubmit={handleSubmit} className={styles.card}>
                 <div className={styles.infoHeader}>
                     <h4><i className="bi bi-key-fill"></i>Redefinir Senha</h4>
@@ -92,6 +93,7 @@ export default function RedefinirSenha() {
                     <Link href={"/login"} className={styles.link}><p className={styles.linkLogin}>Voltar ao login</p></Link>
                 </div>
             </form>
-        </div>
+            </div>
+        </Suspense>
     )
 }

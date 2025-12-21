@@ -48,13 +48,6 @@ jobs:
       - name: Instalar dependências
         run: npm ci
 
-      - name: Diagnóstico de rede
-        run: |
-          echo "Testando conexão com localhost:5432"
-          nc -zv localhost 5432 || true
-          echo "Testando conexão com postgres:5432"
-          nc -zv postgres 5432 || true
-
       - name: Gerar Prisma Client
         run: npx prisma generate
 
@@ -75,18 +68,6 @@ jobs:
 
       - name: Rodar migrations
         run: npx prisma migrate deploy
-
-      - name: Debug JWT secret presence
-        run: |
-          echo "JWT_SECRET set? $([[ -n \"$JWT_SECRET\" ]] && echo ✅ || echo ❌)"
-          echo "JWT_RESET_SECRET set? $([[ -n \"$JWT_RESET_SECRET\" ]] && echo ✅ || echo ❌)"
-          echo "📏 JWT_RESET_SECRET length: ${#JWT_RESET_SECRET}"
-
-      - name: Mostrar envs críticas (sanitizadas)
-        run: |
-          echo "DATABASE_URL=$DATABASE_URL"
-          echo "NODE_ENV=$NODE_ENV"
-          echo "FRONTEND_URL=$FRONTEND_URL"
 
       - name: Rodar testes (Jest)
         run: npm test -- --runInBand --detectOpenHandles --forceExit
