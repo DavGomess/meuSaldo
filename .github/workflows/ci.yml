@@ -54,8 +54,8 @@ jobs:
         env:
           PGPASSWORD: password
         run: |
-          sleep 10 
-          for i in {1..30}; do
+          sleep 20 
+          for i in {1..40}; do
             if pg_isready -h postgres -p 5432 -U user >/dev/null 2>&1; then
               echo "PostgreSQL está pronto!"
               exit 0
@@ -63,7 +63,7 @@ jobs:
             echo "Tentativa $i: PostgreSQL ainda não está pronto..."
             sleep 5
           done
-          echo "Falha: PostgreSQL não ficou pronto após ~150 segundos"
+          echo "Falha: PostgreSQL não ficou pronto após ~200 segundos"
           exit 1
 
       - name: Remover .env local (evitar conflitos)
