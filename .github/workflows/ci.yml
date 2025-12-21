@@ -21,15 +21,15 @@ jobs:
           POSTGRES_PASSWORD: password
           POSTGRES_DB: db
         options: >-
-          --health-cmd="pg_isready -U user -d db -h localhost"
+          --health-cmd="pg_isready -U user -d db"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=60
+          --health-retries=10
 
     env:
       NODE_ENV: test
       CI: "true"
-      DATABASE_URL: "postgresql://user:password@postgres:5432/db"
+      DATABASE_URL: "postgresql://user:password@localhost:5432/db"
       JWT_SECRET: "ci-secret"
       JWT_RESET_SECRET: "ci-reset-secret"
       NEXT_PUBLIC_API_URL: "http://localhost:4000"
@@ -47,23 +47,30 @@ jobs:
       - name: Instalar dependências
         run: npm ci
 
+      - name: Diagnóstico de rede
+        run: |
+          echo "Testando conexão com localhost:5432"
+          nc -zv localhost 5432 || true
+          echo "Testando conexão com postgres:5432"
+          nc -zv postgres 5432 || true
+
       - name: Gerar Prisma Client
         run: npx prisma generate
 
-      - name: Esperar banco estabilizar
+      - name: Esperar banco estabilizar   
+        env:
+          PGPASSWORD: password
         run: |
-          echo "Aguardando Postgres em postgres:5432..."
-          max_retries=60
-          count=0
-          until bash -c "cat < /dev/tcp/postgres/5432" >/dev/null 2>&1; do
-            count=$((count + 1))
-            if [ $count -ge $max_retries ]; then
-              echo "Postgres não ficou pronto após $max_retries tentativas."
-              exit 1
+          for i in {1..60}; do
+            if pg_isready -h localhost -p 5432 -U user >/dev/null 2>&1; then
+              echo "Postgres está aceitando conexões."
+              exit 0
             fi
-            sleep 1
+            echo "Tentativa $i: Postgres ainda não está pronto..."
+            sleep 2
           done
-          echo "Postgres está aceitando conexões."
+          echo "Postgres não ficou pronto após 120 segundos."
+          exit 1
 
       - name: Rodar migrations
         run: npx prisma migrate deploy
