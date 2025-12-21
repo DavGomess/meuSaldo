@@ -50,11 +50,23 @@ jobs:
       - name: Gerar Prisma Client
         run: npx prisma generate
 
+      - name: Esperar banco estabilizar
+        run: |
+          echo "Aguardando Postgres em postgres:5432..."
+          max_retries=60
+          count=0
+          until bash -c "cat < /dev/tcp/postgres/5432" >/dev/null 2>&1; do
+            count=$((count + 1))
+            if [ $count -ge $max_retries ]; then
+              echo "Postgres não ficou pronto após $max_retries tentativas."
+              exit 1
+            fi
+            sleep 1
+          done
+          echo "Postgres está aceitando conexões."
+
       - name: Rodar migrations
         run: npx prisma migrate deploy
-
-      - name: Esperar banco estabilizar
-        run: sleep 10
 
       - name: Rodar testes (Jest)
         run: npm test
