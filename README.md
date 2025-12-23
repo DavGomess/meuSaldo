@@ -1,37 +1,127 @@
-# app-gestao-financeira
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💵 meuSaldo
 
-## Getting Started
+[![Licença: MIT](https://img.shields.io/badge/Licença-MIT-blue.svg)](LICENSE)
+[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18-green)](https://nodejs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
 
-First, run the development server:
+🚀 **Veja em ação**: [https://meusaldo-finance.vercel.app](https://meusaldo-finance.vercel.app)
+
+meuSaldo é uma aplicação web para controle financeiro pessoal, permitindo gerenciar receitas, despesas, contas a pagar, orçamentos e metas financeiras de forma simples e organizada.
+
+## 📌 Funcionalidades
+
+● Gerenciamento de contas a pagar
+
+● Controle de transações (receitas e despesas)
+
+● Criação e acompanhamento de orçamentos por categoria
+
+● Definição de metas financeiras
+
+● Categorias personalizadas por usuário
+
+## 📷 Capturas de telas
+
+### Tela de Login
+![Tela de Login](public/screenshots/login.png)
+
+### Tela de Dashboard
+![Tela de Dashboard](public/screenshots/dashboard.png)
+
+### Tela de Transações
+![Tela de Transações](public/screenshots/transacoes.png)
+
+### Tela de Metas
+![Tela de Metas](public/screenshots/metas.png)
+
+### Tela de Contas a Pagar
+![Tela de Contas a Pagar](public/screenshots/contas-pagar.png)
+
+
+## 🛠️ Tecnologias Utilizadas
+### Frontend
+
+Next.js | React | TypeScript | Context API | CSS Modules | Bootstrap
+
+### Backend
+
+Node.js | Express | Prisma ORM | PostgreSQL | JWT | Bcrypt
+
+### Outros
+
+Jest (testes)
+
+Git / GitHub
+
+## ⚙️ Como Rodar o Projeto 
+### Pré-requisitos
+
+- Node.js (>= 18)
+- PostgreSQL
+- Git
+
+###  Clonar o repositório
+
+```bash
+git clone https://github.com/DavGomess/meuSaldo.git
+
+cd meuSaldo
+```
+### Instalar dependências
+
+```bash
+npm install
+```
+### 🔑 Configurar variáveis de ambiente
+
+### Crie um arquivo .env na raiz do projeto com o seguinte conteúdo:
+
+```bash
+DATABASE_URL=postgresql://usuario:senha@localhost:5432/meusaldodb
+JWT_SECRET=suachave
+JWT_RESET_SECRET=suachave_reset
+NEXT_PUBLIC_API_URL=http://localhost:4000
+FRONTEND_URL=http://localhost:3000
+```
+
+### Rodar migrations
+
+```bash
+npx prisma migrate dev
+```
+### 🚀 Iniciar a aplicação
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### acesse a aplicação em:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+ http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 🧪 Rodar testes
 
-## Learn More
+```bash
+npm run test
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 🔒 Segurança
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+● Tokens JWT com expiração
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+● Prevenção de enumeração de e-mails
 
-## Deploy on Vercel
+● Hash de senha com bcrypt
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+● Invalidação de token de redefinição após uso
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+● Rotas protegidas no frontend
+
+
+## 👤 Autor
+
+Desenvolvido por [David Gomes](https://github.com/DavGomess)  
+
+[![GitHub](https://img.shields.io/badge/GitHub-DavGomess-black?logo=github)](https://github.com/DavGomess) [![LinkedIn](https://img.shields.io/badge/LinkedIn-David%20Gomes-blue?logo=linkedin)](https://www.linkedin.com/in/DavGomess)
