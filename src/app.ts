@@ -15,7 +15,9 @@ const app = express();
 
 
 app.use(express.json());
-app.use(cors({ origin: "http://localhost:3000" }));
+app.use(cors({  origin: [ "http://localhost:3000", "https://meusaldo-finance.vercel.app" ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+}));
 
 
 app.use("/auth", authRoutes);
