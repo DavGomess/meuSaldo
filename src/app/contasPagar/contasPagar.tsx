@@ -24,6 +24,8 @@ export default function ContasPagar() {
     const [editCategoriaId, setEditCategoriaId] = useState<number | null>(null);
     const [categoriaDisplay, setCategoriaDisplay] = useState<string>("Categoria");
 
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
     const handleOpenCategoriaModal = () => setOpenModal('categoria');
     const handleCloseModal = () => setOpenModal(null);
 
@@ -53,7 +55,7 @@ export default function ContasPagar() {
             if (!token) return;
 
             try {
-                const res = await fetch("http://localhost:4000/contasPagar", {
+                const res = await fetch(`${API_URL}/contasPagar`, {
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${token}`,
@@ -109,7 +111,7 @@ export default function ContasPagar() {
             return;
         }
 
-        const res = await fetch("http://localhost:4000/contasPagar", {
+        const res = await fetch(`${API_URL}/contasPagar`, {
             method: "POST",
             body: JSON.stringify(conta),
             headers: {
@@ -140,7 +142,7 @@ export default function ContasPagar() {
                 contaId: contaSalvaAPI.id,
             };
 
-            const transacaoRes = await fetch("http://localhost:4000/transacoes", {
+            const transacaoRes = await fetch(`${API_URL}/transacoes`, {
                 method: "POST",
                 body: JSON.stringify(novaTransacao),
                 headers: {
@@ -179,7 +181,7 @@ export default function ContasPagar() {
         }
 
         try {
-            const res = await fetch(`http://localhost:4000/contasPagar/${conta.id}`, {
+            const res = await fetch(`${API_URL}/contasPagar/${conta.id}`, {
                 method: "PUT",
                 body: JSON.stringify({ status: novoStatus }),
                 headers: {
@@ -223,7 +225,7 @@ export default function ContasPagar() {
         if (!token) return;
 
         try {
-            const resConta = await fetch(`http://localhost:4000/contasPagar/${conta.id}`, {
+            const resConta = await fetch(`${API_URL}/contasPagar/${conta.id}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -480,7 +482,7 @@ export default function ContasPagar() {
                                             }
 
                                             try {
-                                                const res = await fetch(`http://localhost:4000/contasPagar/${selectedConta.id}`, {
+                                                const res = await fetch(`${API_URL}/contasPagar/${selectedConta.id}`, {
                                                     method: "PUT",
                                                     body: JSON.stringify(payload),
                                                     headers: {
