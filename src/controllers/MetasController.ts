@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { MetasService } from "@/services/MetasService";
+import { MetasService } from "../services/MetasService";
 
 const service = new MetasService();
 

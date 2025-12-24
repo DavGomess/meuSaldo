@@ -1,4 +1,4 @@
-import { ContaFromAPI, ContaLocal } from "@/types";
+import { ContaFromAPI, ContaLocal } from "../types";
 import { StatusConta } from "./status";
 
 export function mapContaFromAPI( conta: ContaFromAPI, categorias: { id: number; nome: string }[]): ContaLocal {

@@ -1,5 +1,5 @@
 import { prisma } from "../lib/prisma";
-import { TransacaoFromAPI } from "@/types";
+import { TransacaoFromAPI } from "../types";
 
 export const TransacaoRepository = {
     async criar(data: { userId: number; valor: number; tipo: string; data: string; status: string; categoriaId: number; contaId: number}) {

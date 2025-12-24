@@ -1,7 +1,7 @@
 import { criarConta, listarConta, editarConta, deleteConta } from "../repository/ContasPagarRepository";
 import { definirStatus } from "../utils/status";
 import { CriarContaInput } from  "../types"
-import { prisma } from "@/lib/prisma";
+import { prisma } from "../lib/prisma";
 
 
 export class ContasService {

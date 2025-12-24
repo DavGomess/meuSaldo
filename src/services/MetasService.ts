@@ -1,6 +1,6 @@
-import { prisma } from "@/lib/prisma";
-import { MetasRepository } from "@/repository/MetasRepository";
-import { MetaFromAPI, MetaInput, MetaLocal } from "@/types";
+import { prisma } from "../lib/prisma";
+import { MetasRepository } from "../repository/MetasRepository";
+import { MetaFromAPI, MetaInput, MetaLocal } from "../types";
 
 export class MetasService {
     private repository = new MetasRepository();

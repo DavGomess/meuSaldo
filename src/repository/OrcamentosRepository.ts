@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/prisma";
-import { OrcamentoFromAPI } from "@/types";
+import { prisma } from "../lib/prisma";
+import { OrcamentoFromAPI } from "../types";
 
 export class OrcamentosRepository {
     async criar(data: { categoriaId: number; valor: number; userId: number}): Promise<OrcamentoFromAPI> {

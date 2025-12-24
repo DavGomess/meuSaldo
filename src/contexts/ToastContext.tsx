@@ -1,7 +1,7 @@
 "use client";
 
-import ToastMessage from "@/app/components/ToastMessage";
-import { ToastProps } from "@/types/index";
+import ToastMessage from "../app/components/ToastMessage";
+import { ToastProps } from "../types/index";
 import { createContext, ReactNode, useContext, useState } from "react";
 
 

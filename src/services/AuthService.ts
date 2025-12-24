@@ -1,8 +1,8 @@
 import { prisma } from "../lib/prisma";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { sendResetPasswordEmail } from "@/lib/sendResetPasswordEmail";
-import { JwtPayload } from "@/types";
+import { sendResetPasswordEmail } from "../lib/sendResetPasswordEmail";
+import { JwtPayload } from "../types";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 const JWT_RESET_SECRET = process.env.JWT_RESET_SECRET as string;

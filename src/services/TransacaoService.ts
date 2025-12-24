@@ -1,6 +1,6 @@
-import { TransacaoLocal, TransacaoFromAPI, TransacaoTipo, TransacaoStatus } from "@/types";
+import { TransacaoLocal, TransacaoFromAPI, TransacaoTipo, TransacaoStatus } from "../types";
 import { TransacaoRepository } from "../repository/TransacaoRepository";
-import { StatusConta } from "@/utils/status";
+import { StatusConta } from "../utils/status";
 
 export class TransacaoService {
     async criar(data: { userId: number; valor: number; tipo: string; data: string; status: string; categoriaId: number; contaId: number}): Promise<TransacaoLocal> {

@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { CategoriasController } from "../controllers/CategoriasController";
 import { authenticateToken } from "../middlewares/authMiddleware";
-import { validateBody } from "@/middlewares/validateBody";
-import { createCategoriaSchema } from "@/schemas";
+import { validateBody } from "../middlewares/validateBody";
+import { createCategoriaSchema } from "../schemas";
 
 const router = Router();
 const categoriasController = new CategoriasController()

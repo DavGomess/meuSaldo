@@ -1,10 +1,10 @@
 import { Router, Request, Response } from "express";
-import { AuthController } from "@/controllers/AuthController";
-import { authenticateToken } from "@/middlewares/authMiddleware";
-import { prisma } from "@/lib/prisma";
-import { ResetPasswordController } from "@/controllers/ResetPasswordController";
-import { validateBody } from "@/middlewares/validateBody";
-import { registerSchema, loginSchema, resetPasswordSchema } from "@/schemas";
+import { AuthController } from "../controllers/AuthController";
+import { authenticateToken } from "../middlewares/authMiddleware";
+import { prisma } from "../lib/prisma";
+import { ResetPasswordController } from "../controllers/ResetPasswordController";
+import { validateBody } from "../middlewares/validateBody";
+import { registerSchema, loginSchema, resetPasswordSchema } from "../schemas";
 
 const router = Router();
 const authController = new AuthController();

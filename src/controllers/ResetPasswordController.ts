@@ -1,4 +1,4 @@
-import { AuthService } from "@/services/AuthService";
+import { AuthService } from "../services/AuthService";
 import { Request, Response } from "express";
 
 export class ResetPasswordController {

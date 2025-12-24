@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
-import { getToken } from "@/utils/authToken";
+import { getToken } from "../utils/authToken";
 
 interface User {
     id: number;

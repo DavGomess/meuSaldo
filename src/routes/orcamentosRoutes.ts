@@ -1,8 +1,8 @@
-import { OrcamentosController } from "@/controllers/OrcamentosController";
-import { authenticateToken } from "@/middlewares/authMiddleware";
+import { OrcamentosController } from "../controllers/OrcamentosController";
+import { authenticateToken } from "../middlewares/authMiddleware";
 import { Router } from "express";
-import { validateBody } from "@/middlewares/validateBody";
-import { createOrcamentoSchema } from "@/schemas";
+import { validateBody } from "../middlewares/validateBody";
+import { createOrcamentoSchema } from "../schemas";
 
 const router = Router();
 const orcamentosController = new OrcamentosController();

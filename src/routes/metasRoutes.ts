@@ -1,8 +1,8 @@
-import { MetasController } from "@/controllers/MetasController";
-import { authenticateToken } from "@/middlewares/authMiddleware";
+import { MetasController } from "../controllers/MetasController";
+import { authenticateToken } from "../middlewares/authMiddleware";
 import { Router } from "express";
-import { validateBody } from "@/middlewares/validateBody";
-import { createMetaSchema, adicionarValorSchema, editarMetaSchema } from "@/schemas";
+import { validateBody } from "../middlewares/validateBody";
+import { createMetaSchema, adicionarValorSchema, editarMetaSchema } from "../schemas";
 
 const router = Router();
 const metasController = new MetasController();

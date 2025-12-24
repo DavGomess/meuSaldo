@@ -1,4 +1,4 @@
-import { CategoriaLocal } from "@/types";
+import { CategoriaLocal } from "../types";
 import { CategoriasRepository } from "../repository/CategoriasRepository";
 
 export class CategoriasService {

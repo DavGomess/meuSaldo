@@ -1,4 +1,4 @@
-import { OrcamentosSerivice } from "@/services/OrcamentosService";
+import { OrcamentosSerivice } from "../services/OrcamentosService";
 import { Request, Response } from "express";
 
 const service = new OrcamentosSerivice();

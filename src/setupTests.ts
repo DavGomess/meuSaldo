@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { prisma } from "./lib/prisma";
 import { Server } from "http";
 import app from "./app";
 

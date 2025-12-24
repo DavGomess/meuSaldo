@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/prisma";
-import { CategoriaFromAPI } from "@/types";
+import { prisma } from "../lib/prisma";
+import { CategoriaFromAPI } from "../types";
 
 export class CategoriasRepository {
     async criar(nome: string, tipo: "receita" | "despesa", userId: number): Promise<CategoriaFromAPI> {

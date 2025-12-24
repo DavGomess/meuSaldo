@@ -1,6 +1,6 @@
-import { prisma } from "@/lib/prisma";
-import { OrcamentosRepository } from "@/repository/OrcamentosRepository";
-import { OrcamentoFromAPI, OrcamentoInput, OrcamentoLocal } from "@/types";
+import { prisma } from "../lib/prisma";
+import { OrcamentosRepository } from "../repository/OrcamentosRepository";
+import { OrcamentoFromAPI, OrcamentoInput, OrcamentoLocal } from "../types";
 
 export class OrcamentosSerivice {
     private repository = new OrcamentosRepository();

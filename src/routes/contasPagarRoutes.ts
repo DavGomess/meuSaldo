@@ -1,8 +1,8 @@
 import { Router } from "express";
 import {ContasPagarController} from "../controllers/ContasPagarController"
-import { authenticateToken } from "@/middlewares/authMiddleware";
-import { validateBody } from "@/middlewares/validateBody";
-import { createContaPagarSchema } from "@/schemas";
+import { authenticateToken } from "../middlewares/authMiddleware";
+import { validateBody } from "../middlewares/validateBody";
+import { createContaPagarSchema } from "../schemas";
 
 const router = Router();
 const contasPagarController = new ContasPagarController()

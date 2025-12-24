@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/prisma";
-import { MetaFromAPI } from "@/types";
+import { prisma } from "../lib/prisma";
+import { MetaFromAPI } from "../types";
 
 export class MetasRepository {
     async criar(data: { titulo: string; categoriaId: number | null; valorAlvo: number; prazo: Date; userId: number }): Promise<MetaFromAPI> {
