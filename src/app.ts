@@ -33,12 +33,6 @@ app.use(cors({
     allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
-app.use((req, res, next) => {
-    console.log("Request origin:", req.headers.origin);
-    next();
-});
-
-
 app.use("/auth", authRoutes);
 app.use("/categorias", categoriaRoutes);
 app.use("/contasPagar", contasPagarRoutes);
