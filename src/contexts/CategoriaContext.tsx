@@ -17,11 +17,13 @@ export const CategoriaProvider = ({ children }: { children: ReactNode }) => {
     const [categorias, setCategorias] = useState<CategoriaLocal[]>([]);
     const { user } = useAuth();
 
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
     const carregar = async () => {
         const token = sessionStorage.getItem("token") || localStorage.getItem("token");
         if (!token || !user) return;
         try {
-            const res = await fetch("http://localhost:4000/categorias", {
+            const res = await fetch(`${API_URL}/categorias`, {
                 headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
             });
             if (res.ok) {
@@ -51,7 +53,7 @@ export const CategoriaProvider = ({ children }: { children: ReactNode }) => {
         const token = sessionStorage.getItem("token") || localStorage.getItem("token");
         if (!token) throw new Error("Token não encontrado");
 
-        const res = await fetch("http://localhost:4000/categorias", {
+        const res = await fetch(`${API_URL}/categorias`, {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
             body: JSON.stringify({ nome: nome.trim(), tipo }),
@@ -74,7 +76,7 @@ export const CategoriaProvider = ({ children }: { children: ReactNode }) => {
             throw new Error("Você não pode deletar categorias fixas do sistema.");
         }
 
-        const res = await fetch(`http://localhost:4000/categorias/${id}`, {
+        const res = await fetch(`${API_URL}/categorias/${id}`, {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
         });

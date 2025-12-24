@@ -20,6 +20,8 @@ export const TransacoesProvider = ({ children }: { children: ReactNode }) => {
     const [transacoes, setTransacoes] = useState<TransacaoLocal[]>([]);
     const { user } = useAuth();
 
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
     const adicionar = (nova: TransacaoLocal) => {
         setTransacoes(prev => [...prev, nova]);
     };
@@ -40,7 +42,7 @@ export const TransacoesProvider = ({ children }: { children: ReactNode }) => {
         }
 
         try {
-            const res = await fetch("http://localhost:4000/transacoes", {
+            const res = await fetch(`${API_URL}/transacoes`, {
                 headers: { Authorization: `Bearer ${token}` },
                 cache: "no-store"
             });

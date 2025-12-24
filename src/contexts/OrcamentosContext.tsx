@@ -22,6 +22,7 @@ export const OrcamentosProvider = ({ children }: { children: ReactNode }) => {
   const { transacoes } = useTransacoes();
   const { user } = useAuth();
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
   const sync = async () => {
     const token = sessionStorage.getItem("token") || localStorage.getItem("token");
@@ -31,7 +32,7 @@ export const OrcamentosProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
-      const res = await fetch("http://localhost:4000/orcamentos", { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`${API_URL}/orcamentos`, { headers: { Authorization: `Bearer ${token}` } });
 
       try {
         if (!res.ok) {
@@ -73,7 +74,7 @@ export const OrcamentosProvider = ({ children }: { children: ReactNode }) => {
     const token = sessionStorage.getItem("token") || localStorage.getItem("token");
     if (!token) throw new Error("Não autenticado");
 
-    const res = await fetch("http://localhost:4000/orcamentos", {
+    const res = await fetch(`${API_URL}/orcamentos`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify({ categoriaId, valor }),
@@ -89,7 +90,7 @@ export const OrcamentosProvider = ({ children }: { children: ReactNode }) => {
     const token = sessionStorage.getItem("token") || localStorage.getItem("token");
     if (!token) throw new Error("Não autenticado");
 
-    const res = await fetch("http://localhost:4000/orcamentos", {
+    const res = await fetch(`${API_URL}/orcamentos`, {
       method: "PUT",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify({ categoriaId, valor }),
@@ -107,7 +108,7 @@ export const OrcamentosProvider = ({ children }: { children: ReactNode }) => {
     const token = sessionStorage.getItem("token") || localStorage.getItem("token");
     if (!token) throw new Error("Não autenticado");
 
-    const res = await fetch(`${"http://localhost:4000/orcamentos"}/${categoriaId}`, {
+    const res = await fetch(`${API_URL}/orcamentos/${categoriaId}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });

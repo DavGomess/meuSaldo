@@ -18,6 +18,8 @@ export const MetasProvider = ({ children }: { children: ReactNode }) => {
     const [metas, setMetas] = useState<MetaLocal[]>([]);
     const { user } = useAuth();
 
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
     const sync = async () => {
         const token = sessionStorage.getItem("token") || localStorage.getItem("token");
         if (!token) {
@@ -26,7 +28,7 @@ export const MetasProvider = ({ children }: { children: ReactNode }) => {
         }
 
         try {
-            const res = await fetch("http://localhost:4000/metas", { headers: { Authorization: `Bearer ${token}` } });
+            const res = await fetch(`${API_URL}/metas`, { headers: { Authorization: `Bearer ${token}` } });
 
             if (!res.ok) {
                 setMetas([]);
@@ -60,7 +62,7 @@ export const MetasProvider = ({ children }: { children: ReactNode }) => {
         const token = sessionStorage.getItem("token") || localStorage.getItem("token");
         if (!token) throw new Error("Não autenticado");
 
-        const res = await fetch("http://localhost:4000/metas", {
+        const res = await fetch(`${API_URL}/metas`, {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
             body: JSON.stringify(meta),
@@ -76,7 +78,7 @@ export const MetasProvider = ({ children }: { children: ReactNode }) => {
         const token = sessionStorage.getItem("token") || localStorage.getItem("token");
         if (!token) throw new Error("Não autenticado");
 
-        const res = await fetch(`${"http://localhost:4000/metas"}/${id}/valor`, {
+        const res = await fetch(`${API_URL}/metas/${id}/valor`, {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
             body: JSON.stringify({ valor }),
@@ -91,7 +93,7 @@ export const MetasProvider = ({ children }: { children: ReactNode }) => {
     const editarMeta = async (meta: MetaLocal) => {
         const token = sessionStorage.getItem("token") || localStorage.getItem("token");
         if (!token) throw new Error("Não autenticado");
-        const res = await fetch("http://localhost:4000/metas", {
+        const res = await fetch(`${API_URL}/metas`, {
             method: "PUT",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
             body: JSON.stringify(meta),
@@ -107,7 +109,7 @@ export const MetasProvider = ({ children }: { children: ReactNode }) => {
         const token = sessionStorage.getItem("token") || localStorage.getItem("token");
         if (!token) throw new Error("Não autenticado");
 
-        const res = await fetch(`${"http://localhost:4000/metas"}/${id}`, {
+        const res = await fetch(`${API_URL}/metas/${id}`, {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` }
         });
