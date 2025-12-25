@@ -77,7 +77,7 @@ npm install
 ### Crie um arquivo .env na raiz do projeto com o seguinte conteúdo:
 
 ```bash
-DATABASE_URL=postgresql://usuario:senha@localhost:5432/meusaldodb
+DATABASE_URL=postgresql://usuario:senha@localhost:5432/seubanco
 JWT_SECRET=suachave
 JWT_RESET_SECRET=suachave_reset
 NEXT_PUBLIC_API_URL=http://localhost:4000
