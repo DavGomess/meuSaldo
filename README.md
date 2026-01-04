@@ -7,7 +7,7 @@
 🚀 **Veja em ação**: [https://meusaldo-finance.vercel.app](https://meusaldo-finance.vercel.app)
 
 📦 **Ambiente de produção**  
-O frontend está hospedado na Vercel, o backend na Railway e o banco de dados PostgreSQL é gerenciado pela Neon.
+O frontend está hospedado na Vercel, o backend na Render e o banco de dados PostgreSQL é gerenciado pela Neon.
 
 meuSaldo é uma aplicação web para controle financeiro pessoal, permitindo gerenciar receitas, despesas, contas a pagar, orçamentos e metas financeiras de forma simples e organizada.
 
@@ -56,7 +56,7 @@ Jest | Supertest
 
 ## DevOps / Infra
 
-GitHub Actions (CI) | Vercel (Frontend deploy) | Railway (Backend deploy)
+GitHub Actions (CI) | Vercel (Frontend deploy) | Render (Backend deploy)
 
 ### Outros
 
