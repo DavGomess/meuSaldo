@@ -38,7 +38,11 @@ app.use("/categorias", categoriaRoutes);
 app.use("/contasPagar", contasPagarRoutes);
 app.use("/transacoes", transacaoRoutes);
 app.use("/orcamentos", orcamentoRoutes);
-app.use("/metas", metasRoutes)
+app.use("/metas", metasRoutes);
+
+app.get("/health", (req, res) => {
+    res.status(200).send("OK");
+});
 
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
     console.error(err.stack);
