@@ -6,19 +6,22 @@
 
 🚀 **Veja em ação**: [https://meusaldo-finance.vercel.app](https://meusaldo-finance.vercel.app)
 
+📦 **Ambiente de produção**  
+O frontend está hospedado na Vercel, o backend na Railway e o banco de dados PostgreSQL é gerenciado pela Neon.
+
 meuSaldo é uma aplicação web para controle financeiro pessoal, permitindo gerenciar receitas, despesas, contas a pagar, orçamentos e metas financeiras de forma simples e organizada.
 
 ## 📌 Funcionalidades
 
-● Gerenciamento de contas a pagar
+- Gerenciamento de contas a pagar
 
-● Controle de transações (receitas e despesas)
+- Controle de transações (receitas e despesas)
 
-● Criação e acompanhamento de orçamentos por categoria
+- Criação e acompanhamento de orçamentos por categoria
 
-● Definição de metas financeiras
+- Definição de metas financeiras
 
-● Categorias personalizadas por usuário
+- Categorias personalizadas por usuário
 
 ## 📷 Capturas de telas
 
@@ -45,11 +48,17 @@ Next.js | React | TypeScript | Context API | CSS Modules | Bootstrap
 
 ### Backend
 
-Node.js | Express | Prisma ORM | PostgreSQL | JWT | Bcrypt
+Node.js | Express | Prisma ORM | PostgreSQL (Neon) | JWT | Bcrypt
+
+## Testes
+
+Jest | Supertest
+
+## DevOps / Infra
+
+GitHub Actions (CI) | Vercel (Frontend deploy) | Railway (Backend deploy)
 
 ### Outros
-
-Jest (testes)
 
 Git / GitHub
 
