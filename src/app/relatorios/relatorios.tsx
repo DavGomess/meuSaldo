@@ -319,7 +319,7 @@ export default function Relatorios() {
                         <div className={styles.infoInputsPeriodo}>
                             <label htmlFor="todosPeriodos">Todos os períodos</label>
                             <div className="form-check form-switch">
-                                <input className="form-check-input w-50 m-0 text-white" type="checkbox" id="todosPeriodos" checked={todosPeriodos} onChange={(e) => setTodosPeriodos(e.target.checked)} />
+                                <input className="form-check-input  m-0 text-white" type="checkbox" id="todosPeriodos" checked={todosPeriodos} onChange={(e) => setTodosPeriodos(e.target.checked)} />
                             </div>
                         </div>
                         <hr />

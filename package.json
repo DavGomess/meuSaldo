@@ -2,16 +2,13 @@
   "name": "meusaldo",
   "version": "0.1.0",
   "private": true,
-  
   "scripts": {
     "dev:frontend": "next dev --turbopack",
     "dev:server": "tsx watch src/server.ts",
     "dev": "concurrently --names \"FRONT,BACK\" \"npm run dev:frontend\" \"npm run dev:server\"",
-
     "build:frontend": "next build",
     "build:server": "tsc -p tsconfig.server.json",
     "build": "npm run build:frontend && npm run build:server",
-
     "start": "node dist/server.js",
     "test": "jest --no-cache",
     "test:watch": "jest --watch",

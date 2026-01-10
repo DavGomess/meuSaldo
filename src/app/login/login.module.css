@@ -17,7 +17,6 @@
   width: 100%;
   max-width: 450px;
   border: 1px solid var(--input-border);
-
 }
 
 .infoHeader {
@@ -43,12 +42,10 @@
   color: var(--text-color);
 }
 
-
 .infoInput {
   display: flex;
   flex-direction: column;
 }
-
 
 .infoInput input {
   padding: 0.6rem;
@@ -57,11 +54,10 @@
 }
 
 .infoInput input:focus {
-    border-color: var(--input-focus);
-    outline: none;
-    box-shadow: 0 0 0 2px var(--input-focus);
+  border-color: var(--input-focus);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--input-focus);
 }
-
 
 .card button {
   background-color: #0d6efd;
@@ -77,11 +73,10 @@
 }
 
 .card button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    background-color: #999; 
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #999;
 }
-
 
 .infoFooter {
   display: flex;
@@ -91,7 +86,7 @@
   margin: 0;
 }
 
-.infoFooter p { 
+.infoFooter p {
   margin: 0;
 }
 
@@ -104,11 +99,116 @@
   color: #0d6efd;
 }
 
-.linkregister, .linkRecuperarSenha {
+.linkregister,
+.linkRecuperarSenha {
   color: var(--text-color);
 }
 
-.linkregister:Hover, .linkRecuperarSenha:hover {
+.linkregister:hover,
+.linkRecuperarSenha:hover {
   color: #0d6efd;
 }
 
+/* --- Tablets (até 1024px) --- */
+@media (max-width: 1024px) {
+  .card {
+    max-width: 450px;
+    padding: 1.8rem;
+  }
+
+  .infoHeader p {
+    font-size: 1.5rem;
+  }
+
+  .infoHeader h4 {
+    font-size: 1.6rem;
+  }
+
+  .subTitulo h5 {
+    font-size: 1.4rem;
+  }
+
+  .infoInput label {
+    font-size: 1.25rem;
+  }
+
+  .infoInput input {
+    font-size: 1.25rem;
+  }
+
+  .card button {
+    font-size: 1.15rem;
+  }
+
+  .infoFooter p {
+    font-size: 1.1rem;
+  }
+}
+
+/* --- Celulares grandes (até 768px) --- */
+@media (max-width: 768px) {
+  .card {
+    max-width: 450px;
+    padding: 1.5rem;
+  }
+
+  .infoHeader img {
+    width: 48px;
+    height: 48px;
+  }
+
+  .infoHeader p {
+    font-size: 1.6rem;
+  }
+
+  .subTitulo h5 {
+    font-size: 1.3rem;
+  }
+
+  .infoInput label {
+    font-size: 1.2rem;
+  }
+
+  .infoInput input {
+    padding: 0.55rem;
+    font-size: 1.2rem;
+  }
+
+  .card button {
+    padding: 0.6rem;
+    font-size: 1.1rem;
+  }
+}
+
+/* --- Celulares pequenos (até 480px) --- */
+@media (max-width: 480px) {
+  .container {
+    padding: 1.2rem;
+  }
+
+  .infoHeader p {
+    font-size: 1.5rem;
+  }
+
+  .subTitulo h5 {
+    font-size: 1rem;
+  }
+
+  .infoInput label {
+    font-size: 1rem;
+  }
+
+  .infoInput input {
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .card button {
+    padding: 0.55rem;
+    font-size: 1rem;
+  }
+
+  .infoFooter p {
+    font-size: 1rem;
+  }
+}

@@ -203,3 +203,108 @@
     margin: 0rem;
     font-weight: bold;
 }
+
+/* --- Tablets e telas médias (até 1024px) --- */
+@media (max-width: 1024px) {
+  .containerInfoValores {
+    gap: 0.5rem;
+    justify-content: center;
+  }
+
+  .cardInfoValor {
+    width: 14rem;
+  }
+
+  .grupoInputs {
+    flex-wrap: wrap;
+  }
+
+  .inputCategoria, .inputValor {
+    width: 48%;
+  }
+
+  .inputButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .containerOrcamento {
+    justify-content: start;
+    max-height: none;
+  }
+}
+
+/* --- Celulares grandes (até 768px) --- */
+@media (max-width: 768px) {
+  .main {
+    padding: 1rem;
+  }
+
+  .containerInfoValores {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .cardInfoValor {
+    width: 100%;
+  }
+
+  .grupoInputs {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .inputCategoria, .inputValor, .inputButton {
+    width: 100%;
+  }
+
+  .inputButton button {
+    width: 100%;
+  }
+
+  .containerOrcamento {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    overflow: visible;
+  }
+
+  .cardOrcamento {
+    width: 100%;
+  }
+}
+
+/* --- Celulares pequenos (até 480px) --- */
+@media (max-width: 480px) {
+  .cardBalancoMes h5,
+  .cardAddOrcamento h4 {
+    font-size: 1.1rem;
+  }
+
+  .inputCategoria button,
+  .inputValor input {
+    font-size: 0.85rem;
+    padding: 0.6rem;
+  }
+
+  .cardInfoValor h5 {
+    font-size: 0.9rem;
+  }
+
+  .cardInfoValor p {
+    font-size: 0.9rem;
+  }
+
+  .cardOrcamento {
+    padding: 0.7rem;
+  }
+
+  .infoGasto, .infoOrcamento, .infoRestante {
+    font-size: 0.85rem;
+  }
+
+  .orcamentoConcluido h6 {
+    font-size: 0.9rem;
+  }
+}

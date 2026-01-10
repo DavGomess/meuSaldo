@@ -112,3 +112,110 @@
     color: #0d6efd;
 }
 
+/* --- Tablets (até 1024px) --- */
+@media (max-width: 1024px) {
+  .card {
+    max-width: 450px;
+    padding: 1.8rem;
+  }
+
+  .infoHeader h4 {
+    font-size: 1.6rem;
+  }
+
+  .subTitulo h5 {
+    font-size: 1.4rem;
+  }
+
+  .infoInput label {
+    font-size: 1.25em;
+  }
+  
+  .card button {
+    font-size: 1.15rem;
+  }
+
+  .linkLogin {
+    font-size: 1.15rem;
+  }
+}
+
+/* --- Celulares grandes (até 768px) --- */
+@media (max-width: 768px) {
+  .card {
+    max-width: 450px;
+    padding: 1.5rem;
+  }
+
+  .infoHeader h4 {
+    font-size: 1.25rem;
+  }
+
+  .infoHeader i {
+    font-size: 1.3rem;
+  }
+
+  .subTitulo h5 {
+    font-size: 1.3rem;
+  }
+
+  .infoInput label {
+    font-size: 1.2em;
+  }
+
+  .infoInput input {
+    padding: 0.55rem;
+    font-size: 1.2rem;
+  }
+
+  .card button {
+    padding: 0.6rem;
+    font-size: 1.1rem;
+  }
+
+  .linkLogin {
+    font-size: 1.1rem;
+  }
+}
+
+/* --- Celulares pequenos (até 480px) --- */
+@media (max-width: 480px) {
+  .container {
+    padding: 1.2rem;
+  }
+
+  .card {
+    padding: 1.2rem;
+    gap: 0.8rem;
+  }
+
+  .infoHeader h4 {
+    font-size: 1.3rem;
+  }
+
+  .infoHeader i {
+    font-size: 1.2rem;
+  }
+
+  .subTitulo h5 {
+    font-size: 1.2rem;
+  }
+
+  .infoInput label {
+    font-size: 1rem;
+  }
+
+  .infoInput input {
+    padding: 0.5rem;
+    font-size: 1.2rem;
+  }
+
+  .card button {
+    padding: 0.55rem;
+    font-size: 1.1rem;
+  }
+
+  .infoFooter p {
+    font-size: 1.1rem;
+  }
+}

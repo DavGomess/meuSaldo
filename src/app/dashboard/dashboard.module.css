@@ -73,7 +73,7 @@
     border: 1px solid var(--card-border);
     background-color: var(--card-bg);
     color: var(--text-color);
-    height: 25rem;
+    height: 26rem;
     padding: 1rem;
     border-radius: 0.5rem;
     width: 49%;
@@ -92,7 +92,7 @@
     border: 1px solid var(--card-border);
     background-color: var(--card-bg);
     color: var(--text-color);
-    height: 25rem;
+    height: 26rem;
     padding: 1rem;
     border-radius: 0.5rem;
     width: 49%;
@@ -103,4 +103,89 @@
     gap: 0.5rem;
 }
 
+/* Telas até 1024px (tablets e notebooks pequenos) */
+@media (max-width: 1024px) {
+    .containerGraficos {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .graficoBarra {
+        width: 100%;
+        height: 24rem;
+    }
+
+    .graficoPizza {
+        width: 100%;
+        height: 27rem;
+    }
+
+    .containerInfoValores {
+        gap: 1rem;
+    }
+
+    .infoValoresReceitas p,
+    .infoValoresDespesas p,
+    .infoValoresSaldo p {
+        font-size: 1.2rem;
+    }
+}
+
+/* Telas até 768px (celulares em modo paisagem) */
+@media (max-width: 768px) {
+    .containerInfoValores {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .infoValoresReceitas,
+    .infoValoresDespesas,
+    .infoValoresSaldo {
+        width: 100%;
+    }
+
+    .graficoBarra {
+        width: 100%;
+        height: 24rem;
+    }
+
+    .graficoPizza {
+        width: 100%;
+        height: 26rem;
+    }
+}
+
+/* Telas até 480px (celulares pequenos) */
+@media (max-width: 480px) {
+    .main {
+        padding: 0.8rem;
+        gap: 1.2rem;
+    }
+
+    .containerInfoValores {
+        gap: 0.8rem;
+    }
+
+    .infoValoresReceitas p,
+    .infoValoresDespesas p,
+    .infoValoresSaldo p {
+        font-size: 1rem;
+        padding: 0.4rem;
+    }
+
+    .graficoBarra h4,
+    .graficoPizza h4 {
+        font-size: 1rem;
+    }
+
+    .graficoBarra {
+        height: 24.5rem;
+        padding: 0.8rem;
+    }
+
+    .graficoPizza {
+        height: 25rem;
+        padding: 0.8rem;
+    }
+}
 

@@ -112,3 +112,70 @@
     color: #0d6efd;
 }
 
+@media (max-width: 1024px) {
+    .card {
+        max-width: 450px;
+        padding: 1.8rem;
+    }
+
+    .infoHeader h4 {
+        font-size: 1.6rem;
+    }
+
+    .subTitulo h5 {
+        font-size: 1.4rem;
+    }
+
+    .infoInput label {
+        font-size: 1.25rem;
+    }
+
+    .infoInput input {
+        font-size: 1.25rem;
+    }
+
+    .card button {
+        font-size: 1.15rem;
+    }
+
+    .linkLogin {
+        font-size: 1.15rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .card {
+        max-width: 450px;
+        padding: 1.5rem;
+    }
+
+    .infoHeader h4 {
+        font-size: 1.45rem;
+    }
+
+    .subTitulo h5 {
+        font-size: 1.30rem;
+    }
+
+    .infoInput label {
+        font-size: 1.20rem;
+    }
+
+    .infoInput input {
+        font-size: 1.20rem;
+    }
+
+    .card button {
+        font-size: 1.10rem;
+    }
+
+    .linkLogin {
+        font-size: 1.10rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 1.2rem;
+    }
+}

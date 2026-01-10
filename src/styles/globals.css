@@ -2,7 +2,7 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-}
+  }
 
 :root {
   --bg-color: #e1e7ef;
@@ -106,7 +106,7 @@ hr {
   overflow: hidden;
   font-family: var(--font-poppins), sans-serif;
   font-weight: 700; 
-    }
+}
 
 .menuLateral {
     width: 14rem;
@@ -209,6 +209,72 @@ li.noActive:hover {
     white-space: nowrap; 
 }
 
+/* --- Tablets e telas médias (até 1024px) --- menuLateral*/
+@media (max-width: 1024px) {
+  .menuLateral {
+    width: 12rem;
+  }
+
+  .menuLateral.collapsed {
+    width: 4.5rem;
+  }
+
+  .opcoesMenuLateral li {
+    font-size: 0.95rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .menuIcon {
+    font-size: 0.9rem;
+  }
+
+  .titleApp {
+    font-size: 1rem;
+  }
+
+  .logo {
+    height: 4rem;
+    padding: 0.4rem 0.8rem;
+  }
+}
+
+/* --- Celulares pequenos (até 480px) --- menuLateral */
+@media (max-width: 480px) {
+  .menuLateral {
+    width: 4rem; 
+  }
+
+  .menuLateral.collapsed {
+    width: 3.5rem;    
+  }
+
+  .logo img {
+    width: 32px;
+    height: 32px;
+  }
+
+  .titleApp {
+    display: none;
+  }
+
+  .opcoesMenuLateral li span {
+    display: none;
+  }
+
+  .opcoesMenuLateral i {
+    font-size: 1.1rem;
+  }
+
+  .menuIcon {
+    font-size: 0.9rem;
+  }
+
+  .logo {
+    display: none;
+  }
+}
+
+
 
 .mainContainer {
   flex: 1;
@@ -218,51 +284,125 @@ li.noActive:hover {
   transition: all 0.1s linear;
   background-color: #e1e7ef;
   background-color: var(--bg-color);
+  overflow-y: auto;
 }
 
 .header {
-    height: 5rem;
-    background-color: var(--card-bg);
-    color: var(--text-color);
-    padding: 0.5rem 1rem;    
-    display: flex;
-    gap: 1rem;
-    width: auto;
-}
-
-.header h1 {
-    font-size: 1.2rem;
-    font-weight: 600;
-}
-
-.header p {
-    font-size: 0.9rem;
-    color: rgb(102, 126, 158);
-    font-weight: 500;
+  height: 5rem;
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .header i {
-    border: 1px solid #198754;
-    color: #fff;
-    background-color: #198754;
-    font-size: 2rem;
-    width: 3rem;
-    height: 3rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0.5rem;
+  border: 1px solid #198754;
+  color: #fff;
+  background-color: #198754;
+  font-size: 2rem;
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  flex-shrink: 0;
 }
 
 .headerInfo {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  justify-content: center;
 }
 
-.headerInfo h1, .headerInfo p {
+.header h1 {
+  font-size: 1.2rem;
+  font-weight: 600;
   margin: 0;
-  padding: 0;
+}
+
+.header p {
+  font-size: 0.9rem;
+  color: rgb(102, 126, 158);
+  font-weight: 500;
+  margin: 0.2rem 0 0 0;
+}
+
+/* --- Tablets e telas médias (até 1024px) --- header*/
+@media (max-width: 1024px) {
+  .header {
+    display: flex;
+    align-items: start;
+    height: auto;
+    padding: 0.8rem;
+    gap: 0.8rem;
+  }
+
+  .header i {
+    font-size: 1.8rem;
+    width: 2.6rem;
+    height: 2.6rem;
+  }
+
+  .header h1 {
+    font-size: 1.1rem;
+  }
+
+  .header p {
+    font-size: 0.85rem;
+  }
+}
+
+/* --- Celulares grandes (até 768px) --- header*/
+@media (max-width: 768px) {
+  .header {
+    display: flex;
+    align-items: start;
+  }
+
+  .header i {
+    font-size: 1.6rem;
+    width: 2.4rem;
+    height: 2.4rem;
+  }
+
+  .header h1 {
+    font-size: 1rem;
+  }
+
+  .header p {
+    font-size: 0.8rem;
+  }
+
+  .headerInfo{
+    align-items: flex-start;
+  }
+}
+
+/* --- Celulares pequenos (até 480px) --- header*/
+@media (max-width: 480px) {
+  .header {
+    display: flex;
+    align-items: start;
+    padding: 0.6rem;
+    gap: 0.5rem;
+  }
+
+  .header i {
+    font-size: 1.4rem;
+    width: 2.2rem;
+    height: 2.2rem;
+  }
+
+  .header h1 {
+    font-size: 0.95rem;
+  }
+
+  .header p {
+    font-size: 0.75rem;
+  }
 }
 
 .modalList {
@@ -510,5 +650,3 @@ li .btn {
   filter: var(--btn-close-filter) !important;
   opacity: 0.8;
 }
-
-

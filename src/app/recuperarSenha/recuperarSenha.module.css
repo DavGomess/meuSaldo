@@ -75,3 +75,29 @@
 .card button:hover {
     opacity: 0.9;
 }
+
+
+/* --- Celulares grandes (até 768px) --- */
+@media (max-width: 768px) {
+    .infoHeader h4 {
+        font-size: 1.45rem;
+    }
+
+    .subTitulo h5 {
+        font-size: 1.30rem;
+    }
+
+    .infoInput label {
+        font-size: 1.10rem;
+    }
+
+    .infoInput input {
+        font-size: 1.20rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 1.2rem;
+    }
+}
