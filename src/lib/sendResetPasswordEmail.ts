@@ -6,13 +6,18 @@ export async function sendResetPasswordEmail(to: string, resetLink: string) {
     console.log(`🔗 [CI] Link de redefinição: ${resetLink}`);
     return;
     }
+
+    console.log("[EMAIL] Iniciando criação do transporter...");
     
     const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
             user: process.env.EMAIL_USER, 
             pass: process.env.EMAIL_PASS,
-        }
+        },
+        connectionTimeout: 5000, // 5s para conexão
+        greetingTimeout: 5000,   // 5s para greeting SMTP
+        socketTimeout: 10000,    // 10s para inatividade
     });
 
     const mailOptions = {
@@ -28,5 +33,13 @@ export async function sendResetPasswordEmail(to: string, resetLink: string) {
         `,
     };
 
-    await transporter.sendMail(mailOptions);
+    console.log("[EMAIL] Transporter criado. Iniciando sendMail...");
+
+    try {
+        const info = await transporter.sendMail(mailOptions);
+        console.log("[EMAIL] E-mail enviado com sucesso:", info.response);
+    } catch (error) {
+        console.error("[EMAIL] Erro ao enviar e-mail:", error); // Log erro
+        throw error; // Propague para cima
+    }
 }
