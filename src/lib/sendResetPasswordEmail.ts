@@ -1,8 +1,8 @@
 import nodemailer from "nodemailer";
 
 export async function sendResetPasswordEmail(to: string, resetLink: string) {
-    if (process.env.CI === "true") {
-    console.log(`📨 [CI] Mock de envio de e-mail de reset para: ${to}`);
+    if (process.env.MOCK_EMAIL === "true") {
+    console.log("📨 [MOCK] Envio de e-mail desativado");
     console.log(`🔗 [CI] Link de redefinição: ${resetLink}`);
     return;
     }
