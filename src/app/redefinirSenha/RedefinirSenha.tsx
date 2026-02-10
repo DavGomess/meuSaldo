@@ -15,6 +15,8 @@ export default function RedefinirSenha() {
     const searchParams = useSearchParams();
     const token = searchParams.get("token");
 
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -30,7 +32,7 @@ export default function RedefinirSenha() {
 
         setLoading(true);
         try {
-            const res = await fetch("http://localhost:4000/auth/reset-password/confirm", {
+            const res = await fetch(`${API_URL}/auth/reset-password/confirm`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ token, password: senha }),
