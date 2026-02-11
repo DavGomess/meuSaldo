@@ -1,52 +1,56 @@
-import nodemailer from "nodemailer";
 import { google } from "googleapis";
 
-const OAuth2 = google.auth.OAuth2;
+export async function sendResetPasswordEmail(toEmail: string, resetLink: string) {
+        const CLIENT_ID = process.env.GMAIL_CLIENT_ID;
+        const CLIENT_SECRET = process.env.GMAIL_CLIENT_SECRET;
+        const REFRESH_TOKEN = process.env.GMAIL_REFRESH_TOKEN;
+        const USER_EMAIL = process.env.GMAIL_USER;
 
-export async function sendResetPasswordEmail(to: string, resetLink: string) {
-    if (process.env.MOCK_EMAIL === "true") {
-    console.log("📨 [MOCK] Envio de e-mail desativado");
-    console.log(`🔗 [CI] Link de redefinição: ${resetLink}`);
-    return;
-    }
-
-    console.log("[EMAIL] Iniciando criação do transporter...");
+        const oauth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET);
+        oauth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
     
-    const oauth2Client = new OAuth2( 
-        process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, process.env.GOOGLE_REDIRECT_URI ); oauth2Client.setCredentials({ refresh_token: process.env.GOOGLE_REFRESH_TOKEN, 
-    });
+        const gmail = google.gmail({
+            version: 'v1',
+            auth: oauth2Client
+        });
 
-    try {
+        const subject = "Redefinição de senha - meuSaldo";
+        const encodedSubject = `=?utf-8?B?${Buffer.from(subject, 'utf-8').toString('base64')}?=`;
+
+        const message = `
+            Olá,
+    
+            Você solicitou a redefinição de senha. Clique no link abaixo para prosseguir:
+            https://meusaldo-finance.vercel.app/redefinirSenha?token=${resetLink}
+
+            Este link é válido por 15 minutos.
+            Se você não fez esta solicitação, ignore este e-mail.
+    
+            Atenciosamente,
+            meusaldosuporte@gmail.com  
+        `;
+
+        const rawMessage = Buffer.from(
+            `From: ${USER_EMAIL}\r\n` +
+            `To: ${toEmail}\r\n` +
+            `Subject: ${encodedSubject}\r\n` +
+            `\r\n` +
+            `${message}`
+        ).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
         const accessToken = await oauth2Client.getAccessToken();
+        console.log('Access Token obtido:', !!accessToken);
 
-        const transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-                type: "OAuth2",
-                user: process.env.EMAIL_USER,
-                clientId: process.env.GOOGLE_CLIENT_ID,
-                clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-                refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
-                accessToken: accessToken.token || "",
-            },
-        });
-        
-        const info = await transporter.sendMail({
-            from: `"Suporte meuSaldo" <${process.env.EMAIL_USER}>`,
-            to,
-            subject: "Redefinição de senha - meuSaldo",
-            html: `
-                <p>Olá,</p>
-                <p>Você solicitou a redefinição da sua senha. Clique no link abaixo para criar uma nova senha:</p>
-                <p><a href="${resetLink}" target="_blank">${resetLink}</a></p>
-                <p>Este link é válido por 15 minutos.</p>
-                <p>Se você não fez esta solicitação, ignore este e-mail.</p>
-            `,
-        });
-
-        console.log("[GMAIL API] Enviado:", info.messageId);
-    } catch (error) {
-        console.error("[GMAIL API] Falha geral:", error);
-        throw error; 
-    }
+        try {
+            await gmail.users.messages.send({
+                userId: 'me',
+                requestBody: {
+                raw: rawMessage,
+                },
+            });
+            console.log('E-mail enviado com sucesso para:', toEmail);
+        } catch (error) {
+            console.error('Erro ao enviar e-mail via Gmail API:', error);
+            throw error;
+        }
 }

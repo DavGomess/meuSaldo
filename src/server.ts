@@ -1,5 +1,8 @@
 import app from "./app";
 import { prisma } from "./lib/prisma";
+import dns from "dns";
+
+dns.setDefaultResultOrder("ipv4first")
 
 const PORT = process.env.PORT || 4000;
 

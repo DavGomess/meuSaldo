@@ -54,7 +54,7 @@ export class AuthService {
         const token = jwt.sign({ userId: user.id }, JWT_RESET_SECRET, { expiresIn: "15m" });
         await prisma.user.update({ where: { id: user.id }, data: { resetPasswordToken: token, resetPasswordExpires: new Date(Date.now() + 15 * 60 * 1000) }});
 
-        const resetLink = `${process.env.FRONTEND_URL}/redefinirSenha?token=${token}`;
+        const resetLink = token;
         
         await sendResetPasswordEmail(email, resetLink);
     }
