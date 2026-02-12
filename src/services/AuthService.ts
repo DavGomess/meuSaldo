@@ -46,7 +46,7 @@ export class AuthService {
 
     static async requestPasswordReset(email: string) {
     if (!email) {
-        return { message: "Se o e-mail existir, um link será enviado" };
+        return { message: "Se o e-mail existir, um link será enviado!" };
     }
 
     const user = await prisma.user.findUnique({ where: { email } });
@@ -59,7 +59,7 @@ export class AuthService {
         await sendResetPasswordEmail(email, resetLink);
     }
 
-    return { message: "Se o e-mail existir, um link será enviado" };
+    return { message: "Se o e-mail existir, um link será enviado!" };
 }
 
     static async resetPassword(token: string, newPassword: string) {
