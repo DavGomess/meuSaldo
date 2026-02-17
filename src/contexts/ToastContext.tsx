@@ -6,7 +6,7 @@ import { createContext, ReactNode, useContext, useState } from "react";
 
 
 interface ToastContextType {
-    showToast: (message: string, type?: ToastProps["type"]) => void;
+    showToast: (message: string, type?: ToastProps["type"], duration?: number) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -14,13 +14,13 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 export function ToastProvider({ children }: { children: ReactNode }) {
     const [toasts, setToasts] = useState<ToastProps[]>([]);
 
-    const showToast = (message: string, type: ToastProps["type"] = "primary") => {
+    const showToast = (message: string, type: ToastProps["type"] = "primary", duration: number = 5000) => {
         const id = Date.now().toString();
-        setToasts((prev) => [...prev, { id, message, type }]);
+        setToasts((prev) => [...prev, { id, message, type, duration }]);
 
         setTimeout(() => {
             setToasts((prev) => prev.filter((t) => t.id !== id));
-        }, 3500);
+        }, duration);
     };
 
     return (
@@ -32,6 +32,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                     id={toast.id}
                     message={toast.message}
                     type={toast.type}
+                    duration={toast.duration}
                 />
             ))}
         </ToastContext.Provider>

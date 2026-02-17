@@ -101,6 +101,7 @@ export interface ToastProps {
     id: string;
     message: string;
     type?: "primary" | "success" | "danger" | "warning" | undefined;
+    duration?: number;
 };
 
 export type OrcamentoFromAPI = Prisma.OrcamentoGetPayload<{ include: { categoria: true } }>;
@@ -125,7 +126,6 @@ export interface MetaLocal {
 }
 
 export type MetaInput = Omit<MetaLocal, "id" | "valorAtual">;
-
 
 export interface JwtPayload {
     userId: number;

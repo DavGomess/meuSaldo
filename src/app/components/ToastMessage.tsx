@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { ToastProps } from "../../types";
 import type { Toast as BsToast } from "bootstrap";
 
-export default function ToastMessage({ id, message, type = "primary" }: ToastProps) {
+export default function ToastMessage({ id, message, type = "primary", duration = 5000 }: ToastProps) {
     const toastRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
@@ -18,7 +18,7 @@ export default function ToastMessage({ id, message, type = "primary" }: ToastPro
                 if (!toastRef.current) return;
                 instance = Toast.getOrCreateInstance(toastRef.current!, {
                     autohide: true,
-                    delay: 3000,
+                    delay: duration,
                 });
                 instance?.show();
             })
@@ -28,7 +28,7 @@ export default function ToastMessage({ id, message, type = "primary" }: ToastPro
                 instance?.dispose();
             }
         };
-}, [message]);
+}, [duration, message]);
 
 
     return (

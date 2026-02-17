@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { sendResetPasswordEmail } from "../lib/sendResetPasswordEmail";
 import { JwtPayload } from "../types";
+import validarSenhaBackend  from "../lib/validarSenhaBackend";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 const JWT_RESET_SECRET = process.env.JWT_RESET_SECRET as string;
@@ -15,9 +16,8 @@ export class AuthService {
     if (!email.includes("@")) {
         throw new Error("E-mail inválido");
     }
-    if (password.length < 6) {
-        throw new Error("A senha deve ter pelo menos 6 caracteres");
-    }
+    
+    validarSenhaBackend(password);
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) throw new Error("E-mail já cadastrado");
@@ -55,7 +55,6 @@ export class AuthService {
         await prisma.user.update({ where: { id: user.id }, data: { resetPasswordToken: token, resetPasswordExpires: new Date(Date.now() + 15 * 60 * 1000) }});
 
         const resetLink = token;
-        
         await sendResetPasswordEmail(email, resetLink);
     }
 
@@ -63,16 +62,13 @@ export class AuthService {
 }
 
     static async resetPassword(token: string, newPassword: string) {
-    if (!newPassword || newPassword.length < 6) {
-        throw new Error("A nova senha deve ter pelo menos 6 caracteres");
-    }
-
     let payload: JwtPayload;
-    try {
-        payload = jwt.verify(token, JWT_RESET_SECRET) as JwtPayload;
-    } catch {
-        throw new Error("Token inválido ou expirado");
-    }
+        try {
+            payload = jwt.verify(token, JWT_RESET_SECRET) as JwtPayload;
+        } catch {
+            throw new Error("Token inválido ou expirado");
+        }
+        validarSenhaBackend(newPassword);
 
     const user = await prisma.user.findFirst({
         where: {

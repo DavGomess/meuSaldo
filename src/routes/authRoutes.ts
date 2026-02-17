@@ -4,7 +4,7 @@ import { authenticateToken } from "../middlewares/authMiddleware";
 import { prisma } from "../lib/prisma";
 import { ResetPasswordController } from "../controllers/ResetPasswordController";
 import { validateBody } from "../middlewares/validateBody";
-import { registerSchema, loginSchema, resetPasswordSchema } from "../schemas";
+import { registerSchema, loginSchema, resetPasswordSchema, confirmResetPasswordSchema } from "../schemas";
 
 const router = Router();
 const authController = new AuthController();
@@ -21,6 +21,6 @@ router.post("/logout", (req: Request, res: Response) => {
     res.json({ message: "Logout realizado com sucesso" });
 });
 router.post("/reset-password", validateBody(resetPasswordSchema), ResetPasswordController.requestReset);
-router.post("/reset-password/confirm", ResetPasswordController.reset);
+router.post("/reset-password/confirm", validateBody(confirmResetPasswordSchema), ResetPasswordController.reset);
 
 export default router;

@@ -5,6 +5,8 @@ export async function sendResetPasswordEmail(toEmail: string, resetLink: string)
         const CLIENT_SECRET = process.env.GMAIL_CLIENT_SECRET;
         const REFRESH_TOKEN = process.env.GMAIL_REFRESH_TOKEN;
         const USER_EMAIL = process.env.GMAIL_USER;
+
+        const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
             
         const oauth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET);
         oauth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
@@ -21,7 +23,7 @@ export async function sendResetPasswordEmail(toEmail: string, resetLink: string)
         <p>Olá,</p>
         <p>Você solicitou a redefinição de senha. Clique no link abaixo para prosseguir:</p>
         <p>
-            <a href="https://meusaldo-finance.vercel.app/redefinirSenha?token=${resetLink}">
+            <a href="${APP_URL}/redefinirSenha?token=${resetLink}">
                 Redefinir minha senha
             </a>
         </p>

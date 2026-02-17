@@ -5,6 +5,7 @@ import styles from "./redefinirSenha.module.css";
 import Link from "next/link";
 import { useToast } from "../../contexts/ToastContext"
 import { useSearchParams, useRouter } from "next/navigation";
+import validarSenha from "../../lib/validarSenha"
 
 export default function RedefinirSenha() {
     const { showToast } = useToast();
@@ -20,13 +21,15 @@ export default function RedefinirSenha() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (senha !== confirmarSenha) {
-            showToast("As senhas não coincidem!", "danger");
+        const resultado = validarSenha({ senha, confirmarSenha});
+        
+        if(!resultado.valido) {
+            showToast(resultado.mensagem!, "danger");
             return;
         }
 
         if (!token) {
-            showToast("Token de redefinição inválido ou ausente.", "danger");
+            console.error("Token de redefinição inválido ou ausente.");
             return;
         }
 

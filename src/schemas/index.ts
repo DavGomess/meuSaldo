@@ -24,6 +24,11 @@ export const resetPasswordSchema = z.object({
     email: z.string().email("E-mail inválido"),
 });
 
+export const confirmResetPasswordSchema = z.object({
+    token: z.string().min(1, "Token obrigatório"),
+    password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
+});
+
 export const createCategoriaSchema = z.object({
     nome: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
     tipo: z.enum(["despesa", "receita"], { message: "Tipo deve ser 'despesa' ou 'receita'" }),

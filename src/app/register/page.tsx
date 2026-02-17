@@ -6,6 +6,7 @@ import styles from "./register.module.css";
 import Link from "next/link";
 import { useToast } from "../../contexts/ToastContext"
 import { useRouter } from "next/navigation";
+import validarSenha from "../../lib/validarSenha";
 
 export default function Register() {
     const { register, user } = useAuth();
@@ -29,13 +30,10 @@ export default function Register() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (senha !== confirmarSenha) {
-            showToast("As senhas não coincidem!", "danger");
-            return;
-        }
+        const resultado = validarSenha({ senha, confirmarSenha});
 
-        if (senha.length < 6 || confirmarSenha.length < 6) {
-            showToast("A senha deve ter pelo menos 6 caracteres!", "danger");
+        if(!resultado.valido) {
+            showToast(resultado.mensagem!, "danger");
             return;
         }
 
