@@ -132,6 +132,7 @@ export default function ContasPagar() {
                 return atualizadas;
             });
 
+            showToast("Conta criada com sucesso!", "success");
             form.reset();
             setNovaData(null);
             setEditCategoriaId(null);
@@ -161,9 +162,8 @@ export default function ContasPagar() {
             if (!transacaoRes.ok) {
                 throw new Error("Erro ao criar transação");
             }
-                await syncTransacoes();
+                // await syncTransacoes();
 
-            showToast("Conta criada com sucesso!", "success");
         } catch (err) {
             console.error(err);
             showToast("Erro ao sincronizar transação", "danger");
