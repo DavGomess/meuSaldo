@@ -70,7 +70,7 @@ export const TransacoesProvider = ({ children }: { children: ReactNode }) => {
     } catch {
         setTransacoes([]);
     }
-}, []);
+}, [API_URL]);
 
     useEffect(() => {
         if (user) {

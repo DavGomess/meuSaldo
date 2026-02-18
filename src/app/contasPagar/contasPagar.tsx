@@ -75,7 +75,7 @@ export default function ContasPagar() {
             }
         };
         carregarContas();
-    }, [categorias]);
+    }, [API_URL, categorias]);
 
 
     const categoriasParaModal = {
@@ -132,6 +132,13 @@ export default function ContasPagar() {
                 return atualizadas;
             });
 
+            form.reset();
+            setNovaData(null);
+            setEditCategoriaId(null);
+            setCategoriaDisplay("Categoria");
+
+        (async () => {
+            try {
             const novaTransacao = {
                 valor: contaSalvaAPI.valor,
                 tipo: categoriaTipo,
@@ -151,15 +158,17 @@ export default function ContasPagar() {
                 },
             });
 
-            if (transacaoRes.ok) {
-                await syncTransacoes();
+            if (!transacaoRes.ok) {
+                throw new Error("Erro ao criar transação");
             }
+                await syncTransacoes();
 
             showToast("Conta criada com sucesso!", "success");
-            form.reset();
-            setNovaData(null);
-            setEditCategoriaId(null);
-            setCategoriaDisplay("Categoria");
+        } catch (err) {
+            console.error(err);
+            showToast("Erro ao sincronizar transação", "danger");
+        }
+    })();
         } else {
             const erro = await res.json();
             showToast(erro.error || "Erro ao criar conta", "danger");
