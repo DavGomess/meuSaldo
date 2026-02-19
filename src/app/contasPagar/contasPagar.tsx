@@ -139,10 +139,10 @@ export default function ContasPagar() {
         });
 
         if (res.ok) {
+            showToast("Conta criada com sucesso!", "success");
             const contaSalvaAPI: ContaFromAPI = await res.json();
             const novaConta = mapContaFromAPI(contaSalvaAPI, categorias);
             setContas(prev => prev.map(c => c.id === tempId ? novaConta : c));
-            showToast("Conta criada com sucesso!", "success");
             form.reset();
             setNovaData(null);
             setEditCategoriaId(null);
@@ -188,8 +188,8 @@ export default function ContasPagar() {
                 throw new Error("Erro ao atualizar status");
             }
 
-            await syncTransacoes();
             showToast("Conta editada com sucesso!", "success");
+            await syncTransacoes();
         
         } catch (err) {
             console.error(err);
@@ -227,8 +227,8 @@ export default function ContasPagar() {
             if (!resConta.ok) throw new Error("Erro ao deletar conta");
 
             setContas(prev => prev.filter(c => c.id !== conta.id));
-            await syncTransacoes();
             showToast("Conta deletada com sucesso!", "success");
+            await syncTransacoes();
         } catch {
             showToast("Erro ao deletar conta", "danger");
         }
@@ -497,8 +497,8 @@ export default function ContasPagar() {
                                                 setContas(novasContas)
                                                 localStorage.setItem("contas", JSON.stringify(novasContas));
 
-                                                await syncTransacoes();
                                                 showToast("Conta editada com sucesso!", "success");
+                                                await syncTransacoes();
                                             } catch (err: unknown) {
                                                 const errorMessage = err instanceof Error ? err.message : "Erro ao editar conta";
                                                 showToast(errorMessage, "danger");
