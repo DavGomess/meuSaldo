@@ -5,9 +5,7 @@ import { StatusConta } from "../utils/status";
 export class TransacaoService {
     async criar(data: { userId: number; valor: number; tipo: string; data: string; status: string; categoriaId: number; contaId: number}): Promise<TransacaoLocal> {
         const transacaoCriada = await TransacaoRepository.criar(data);
-        const transacoes = await TransacaoRepository.findAllByUser(data.userId);
-        const formatada = this.formatTransacoes(transacoes).find(t => t.id === transacaoCriada.id);
-        return formatada || this.formatTransacoes([transacaoCriada])[0];
+        return this.formatTransacoes([transacaoCriada])[0];
     }
 
     async listar(userId: number): Promise<TransacaoLocal[]> {

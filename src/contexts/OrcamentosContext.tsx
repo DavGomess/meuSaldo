@@ -1,7 +1,7 @@
 "use client";
 
 import { OrcamentoFromAPI, OrcamentoLocal } from "../types";
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { createContext, ReactNode, useContext, useEffect, useState, useCallback } from "react";
 import { useAuth } from "./AuthContext";
 import { useTransacoes } from "./TransacoesContext";
 
@@ -24,7 +24,7 @@ export const OrcamentosProvider = ({ children }: { children: ReactNode }) => {
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
-  const sync = async () => {
+  const sync = useCallback(async () => {
     const token = sessionStorage.getItem("token") || localStorage.getItem("token");
     if (!token) {
       setOrcamentos([]);
@@ -34,7 +34,6 @@ export const OrcamentosProvider = ({ children }: { children: ReactNode }) => {
     try {
       const res = await fetch(`${API_URL}/orcamentos`, { headers: { Authorization: `Bearer ${token}` } });
 
-      try {
         if (!res.ok) {
           console.error("[Orcamentos] resposta não OK:", res.status, await res.text());
           setOrcamentos([]);
@@ -55,20 +54,16 @@ export const OrcamentosProvider = ({ children }: { children: ReactNode }) => {
           valor: Number(orcamento.valor),
         }));
         setOrcamentos(orcamentosFormatados);
-      } catch (err) {
-        console.error("[Orcamentos] erro ao parsear body:", err);
+      } catch {
         setOrcamentos([]);
       }
-    } catch {
-      setOrcamentos([]);
-    }
-  };
+  },  [API_URL]);
 
   useEffect(() => {
     if (user) {
       sync();
     }
-  }, [user]);
+  }, [sync, user]);
 
   const upsert = async (categoriaId: number, valor: number) => {
     const token = sessionStorage.getItem("token") || localStorage.getItem("token");

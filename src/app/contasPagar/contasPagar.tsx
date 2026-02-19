@@ -11,8 +11,10 @@ import { useToast } from "../../contexts/ToastContext";
 import { ContaFromAPI } from "../../types";
 import { mapContaFromAPI } from "@/utils/mapConta";
 import { getToken } from "@/utils/authToken";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function ContasPagar() {
+    const { user } = useAuth();
     const { categorias } = useCategorias();
     const { syncTransacoes } = useTransacoes();
     const { showToast } = useToast();
@@ -98,7 +100,7 @@ export default function ContasPagar() {
             return;
         }
 
-        const conta = {
+        const contaPayload = {
             nome: formData.get("nome") as string,
             valor: Number(formData.get("valor")),
             categoriaId: editCategoriaId,
@@ -111,9 +113,25 @@ export default function ContasPagar() {
             return;
         }
 
+    const tempId = -Date.now(); 
+    const optimisticAPI: ContaFromAPI = {
+        id: tempId,
+        nome: contaPayload.nome,
+        valor: contaPayload.valor,
+        categoriaId: editCategoriaId,
+        data: contaPayload.data,
+        status: definirStatus(contaPayload.data),
+        userId: user?.id || 0, 
+        categoria: categorias.find(c => c.id === editCategoriaId) || null
+    };
+
+    const optimisticConta = mapContaFromAPI(optimisticAPI, categorias);
+    setContas(prev => [...prev, optimisticConta]);
+
+    try {
         const res = await fetch(`${API_URL}/contasPagar`, {
             method: "POST",
-            body: JSON.stringify(conta),
+            body: JSON.stringify(contaPayload),
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`
@@ -122,57 +140,24 @@ export default function ContasPagar() {
 
         if (res.ok) {
             const contaSalvaAPI: ContaFromAPI = await res.json();
-            const categoriaTipo = categorias.find(c => c.id === contaSalvaAPI.categoriaId)?.tipo || "despesa";
-
             const novaConta = mapContaFromAPI(contaSalvaAPI, categorias);
-
-            setContas(prev => {
-                const atualizadas = [...prev, novaConta];
-                localStorage.setItem("contas", JSON.stringify(atualizadas));
-                return atualizadas;
-            });
-
+            setContas(prev => prev.map(c => c.id === tempId ? novaConta : c));
             showToast("Conta criada com sucesso!", "success");
             form.reset();
             setNovaData(null);
             setEditCategoriaId(null);
             setCategoriaDisplay("Categoria");
-
-        (async () => {
-            try {
-            const novaTransacao = {
-                valor: contaSalvaAPI.valor,
-                tipo: categoriaTipo,
-                data: contaSalvaAPI.data,
-                status: contaSalvaAPI.status,
-                categoriaId: contaSalvaAPI.categoriaId,
-                userId: contaSalvaAPI.userId,
-                contaId: contaSalvaAPI.id,
-            };
-
-            const transacaoRes = await fetch(`${API_URL}/transacoes`, {
-                method: "POST",
-                body: JSON.stringify(novaTransacao),
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            if (!transacaoRes.ok) {
-                throw new Error("Erro ao criar transação");
-            }
-                // await syncTransacoes();
-
-        } catch (err) {
-            console.error(err);
-            showToast("Erro ao sincronizar transação", "danger");
-        }
-    })();
+            await syncTransacoes();
         } else {
             const erro = await res.json();
-            showToast(erro.error || "Erro ao criar conta", "danger");
+            throw new Error(erro.error || "Erro ao criar conta");
         }
+    } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : "Erro ao criar conta";
+
+        showToast(errorMessage, "danger");
+        setContas(prev => prev.filter(c => c.id !== tempId));
+    }
     };
 
     const toggleStatus = async (conta: ContaLocal) => {

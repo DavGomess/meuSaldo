@@ -1,4 +1,4 @@
-import { criarConta, listarConta, editarConta, deleteConta } from "../repository/ContasPagarRepository";
+import { listarConta, editarConta, deleteConta } from "../repository/ContasPagarRepository";
 import { definirStatus } from "../utils/status";
 import { CriarContaInput } from  "../types"
 import { prisma } from "../lib/prisma";
@@ -6,32 +6,40 @@ import { prisma } from "../lib/prisma";
 
 export class ContasService {
     async criarContaService(dados: CriarContaInput, userId: number) {
+        if (!dados.categoriaId) {
+            throw new Error("Categoria é obrigatória");
+        }
         
-        if (dados.categoriaId != null) {
-            const categoria = await prisma.categoria.findFirst({
-            where: {
-                id: dados.categoriaId,
-                OR: [
-                    { userId },
-                    { userId: null }
-                ],
+        const status = definirStatus(dados.data);
+        return prisma.$transaction(async (tx) => {
+        const conta = await tx.contasPagar.create({
+            data: {
+                nome: dados.nome,
+                valor: dados.valor,
+                data: new Date(dados.data),
+                status,
+                user: { connect: { id: userId } },
+                categoria: dados.categoriaId ? { connect: { id: dados.categoriaId } } : undefined,
             },
+            include: { categoria: true },
         });
 
-        if (!categoria) {
-            throw new Error("Categoria inválida ou não pertence ao usuário");
-        }
-    }
-
-        const status = definirStatus(dados.data);
-        return criarConta(
-            {
-                ...dados,
-                status, 
-                categoriaId: dados.categoriaId ?? null,
+        const tipo = conta.categoria?.tipo || 'despesa';
+        await tx.transacao.create({
+            data: {
+                valor: conta.valor,
+                tipo,
+                data: conta.data,
+                status: conta.status,
+                user: { connect: { id: userId } },
+                categoria: conta.categoriaId ? { connect: { id: conta.categoriaId } } : undefined,
+                conta: { connect: { id: conta.id } },
             },
-            userId
-        );
+            include: { categoria: true, conta: true }, 
+        });
+
+        return conta; 
+    });
 }
 
     async listarContasService(userId: number) {
