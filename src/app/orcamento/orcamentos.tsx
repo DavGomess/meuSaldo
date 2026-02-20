@@ -59,13 +59,14 @@ export default function Orcamento() {
             return;
         }
 
+        const mensagemSucesso = editandoOrcamentoId ? "Orçamento editado com sucesso!" : "Orçamento criado com sucesso!";
+        showToast(mensagemSucesso, "success");
+
         try {
             if (editandoOrcamentoId) {
                 await update(categoriaId, valor);
-                showToast("Orçamento editado com sucesso!", "success");
             } else {
                 await upsert(categoriaId, valor);
-                showToast("Orçamento criado com sucesso!", "success");
             }
 
             await sync();
@@ -89,10 +90,10 @@ export default function Orcamento() {
 
     const handleRemover = async (categoriaId: number) => {
         if (!confirm("Tem certeza que deseja remover este orçamento?")) return;
+        showToast("Orçamento removido com sucesso!", "success");
+        
         try {
             await remover(categoriaId);
-            await sync();
-            showToast("Orçamento removido com sucesso!", "success");
         } catch {
             showToast("Erro ao remover", "danger");
         }

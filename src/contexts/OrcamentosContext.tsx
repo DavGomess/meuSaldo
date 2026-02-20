@@ -69,35 +69,66 @@ export const OrcamentosProvider = ({ children }: { children: ReactNode }) => {
     const token = sessionStorage.getItem("token") || localStorage.getItem("token");
     if (!token) throw new Error("Não autenticado");
 
-    const res = await fetch(`${API_URL}/orcamentos`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ categoriaId, valor }),
+    const existing = orcamentos.find(o => o.categoriaId === categoriaId);
+    const tempId = existing ? existing.id : -Date.now();
+    const optimisticOrc: OrcamentoLocal = {
+      id: tempId,
+      categoriaId,
+      valor,
+    };
+
+    setOrcamentos(prev => {
+      if (existing) {
+        return prev.map(o => o.categoriaId === categoriaId ? optimisticOrc : o);
+      } else {
+        return [...prev, optimisticOrc];
+      }
     });
-    if (!res.ok) {
-      const error = await res.json().catch(() => ({}));
-      throw new Error(error.error || "Erro ao salvar orçamento");
+    
+    try {
+      const res = await fetch(`${API_URL}/orcamentos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ categoriaId, valor }),
+      });
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({}));
+        throw new Error(error.error || "Erro ao salvar orçamento");
+      }
+      await sync();
+    } catch (err) {
+      await sync();
+      throw err;
     }
-    await sync();
-  };
+};
 
   const update = async (categoriaId: number, valor: number) => {
     const token = sessionStorage.getItem("token") || localStorage.getItem("token");
     if (!token) throw new Error("Não autenticado");
 
-    const res = await fetch(`${API_URL}/orcamentos`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ categoriaId, valor }),
-    });
+    const existing = orcamentos.find(o => o.categoriaId === categoriaId);
+    if (!existing) throw new Error("Orçamento não encontrado");
 
-    if (!res.ok) {
-      const error = await res.json().catch(() => ({}));
-      throw new Error(error.error || "Erro ao atualizar orçamento");
-    }
+    setOrcamentos(prev => prev.map(o => o.categoriaId === categoriaId ? { ...o, valor } : o));
 
+    try {
+      const res = await fetch(`${API_URL}/orcamentos`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ categoriaId, valor }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({}));
+        throw new Error(error.error || "Erro ao atualizar orçamento");
+      }
+
+      await sync();
+  } catch (err) {
     await sync();
-  };
+    throw err;
+  }
+};
 
   const remover = async (categoriaId: number) => {
     const token = sessionStorage.getItem("token") || localStorage.getItem("token");

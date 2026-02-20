@@ -126,7 +126,7 @@ export default function ContasPagar() {
         };
 
         const tempTransId = adicionarOtimitica({
-            valor: -contaPayload.valor,
+            valor: contaPayload.valor,
             categoriaId: contaPayload.categoriaId,
             data: contaPayload.data,
             tipo: "despesa",

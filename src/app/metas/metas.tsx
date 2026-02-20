@@ -67,7 +67,7 @@ export default function Metas() {
                 prazo,
             });
 
-            showToast("Meta criada!", "success");
+            showToast("Meta criada com sucesso!", "success");
             resetForm();
         } catch {
             showToast("Erro ao criar", "danger");
@@ -152,7 +152,7 @@ export default function Metas() {
         };
         try {
             await editarMeta(metaAtualizada);
-            showToast("Meta editada!", "success");
+            showToast("Meta editada com sucesso!", "success");
             resetForm();
             setModoEdicao(false);
             setEditandoMetaId(null);
