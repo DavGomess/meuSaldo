@@ -59,6 +59,8 @@ export default function Metas() {
         const categoriaId = categoriaMap.get(selectedCategoria) ?? null;
         const prazo = formatarDataParaBackend(novaData);
         
+        showToast("Meta criada com sucesso!", "success");
+        
         try {
             await adicionarMeta({
                 titulo,
@@ -67,7 +69,6 @@ export default function Metas() {
                 prazo,
             });
 
-            showToast("Meta criada com sucesso!", "success");
             resetForm();
         } catch {
             showToast("Erro ao criar", "danger");
@@ -80,10 +81,11 @@ export default function Metas() {
 
         if (isNaN(valor) || valor <= 0) return;
 
+        showToast("Valor adicionado!", "success");
+        
         try {
             await adicionarValorMeta(metaId, valor);
             setValorAdicionar(prev => ({ ...prev, [metaId]: "" }));
-            showToast("Valor adicionado!", "success");
         } catch {
             showToast("Erro ao adicionar valor", "danger");
         }
@@ -150,9 +152,11 @@ export default function Metas() {
             valorAtual: metas.find(m => m.id === editandoMetaId)?.valorAtual ?? 0,
             prazo,
         };
+        
+        showToast("Meta editada com sucesso!", "success");
+        
         try {
             await editarMeta(metaAtualizada);
-            showToast("Meta editada com sucesso!", "success");
             resetForm();
             setModoEdicao(false);
             setEditandoMetaId(null);
@@ -220,8 +224,9 @@ export default function Metas() {
                                 </div>
                                 <div className={styles.iconsMetas}>
                                     <i className="bi bi-pencil iconPencil" onClick={() => handleEditClick(meta)}></i>
-                                    <i className="bi bi-trash iconTrash" onClick={() => {removerMeta(meta.id)
-                                        .then(() => showToast("Meta removida com sucesso!", "success"))
+                                    <i className="bi bi-trash iconTrash" onClick={() => {
+                                        showToast("Meta removida com sucesso!", "success")
+                                        removerMeta(meta.id)
                                         .catch(() => showToast("Erro ao remover meta", "danger"));
                                     }}></i>
                                 </div>
