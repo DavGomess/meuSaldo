@@ -514,6 +514,10 @@ export default function ContasPagar() {
                                                 });
                                             }
 
+                                            setIsEditing(false);
+                                            setSelectedConta(null);
+                                            setEditCategoriaId(null);
+
                                                 try {
                                                     const res = await fetch(`${API_URL}/contasPagar/${selectedConta.id}`, {
                                                         method: "PUT",
@@ -553,11 +557,7 @@ export default function ContasPagar() {
                                                             status: originalTransacao.status    
                                                         });
                                                     }
-                                                } finally {
-                                                    setIsEditing(false);
-                                                    setSelectedConta(null);
-                                                    setEditCategoriaId(null);
-                                                }
+                                                } 
                                             }
                                         }>
                                         Salvar

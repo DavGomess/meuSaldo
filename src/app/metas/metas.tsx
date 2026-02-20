@@ -81,7 +81,7 @@ export default function Metas() {
 
         if (isNaN(valor) || valor <= 0) return;
 
-        showToast("Valor adicionado!", "success");
+        showToast("Valor adicionado com sucesso!", "success");
         
         try {
             await adicionarValorMeta(metaId, valor);
