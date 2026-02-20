@@ -1,7 +1,7 @@
 "use client";
 
 import { MetaFromAPI, MetaLocal } from "../types"
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
 
 interface MetasContextType {
@@ -20,7 +20,7 @@ export const MetasProvider = ({ children }: { children: ReactNode }) => {
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
-    const sync = async () => {
+    const sync = useCallback(async () => {
         const token = sessionStorage.getItem("token") || localStorage.getItem("token");
         if (!token) {
             setMetas([]);
@@ -48,7 +48,7 @@ export const MetasProvider = ({ children }: { children: ReactNode }) => {
         } catch {
             setMetas([]);
         }
-    };
+    }, [API_URL]);
 
     useEffect(() => {
         if (user) {
@@ -56,12 +56,24 @@ export const MetasProvider = ({ children }: { children: ReactNode }) => {
         } else {
             setMetas([]);
         }
-    }, [user]);
+    }, [sync, user]);
 
     const adicionarMeta = async (meta: Omit<MetaLocal, "id" | "valorAtual">) => {
         const token = sessionStorage.getItem("token") || localStorage.getItem("token");
         if (!token) throw new Error("Não autenticado");
 
+        const tempId = -Date.now();
+        const optimistic: MetaLocal = {
+            id: tempId,
+            titulo: meta.titulo,
+            categoriaId: meta.categoriaId,
+            valorAlvo: meta.valorAlvo,
+            valorAtual: 0,
+            prazo: meta.prazo
+        };
+        setMetas(prev => [...prev, optimistic]);
+
+    try {
         const res = await fetch(`${API_URL}/metas`, {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -72,12 +84,22 @@ export const MetasProvider = ({ children }: { children: ReactNode }) => {
             throw new Error(error.error || "Erro ao criar meta");
         }
         await sync();
-    };
-
+    } catch (err) {
+        await sync();
+        throw err;
+    }
+};
     const adicionarValorMeta = async (id: number, valor: number) => {
         const token = sessionStorage.getItem("token") || localStorage.getItem("token");
         if (!token) throw new Error("Não autenticado");
 
+        const currentMeta = metas.find(m => m.id === id);
+        if (!currentMeta) throw new Error("Meta não encontrada");
+
+        const novoValor = Math.min(currentMeta.valorAtual + valor, currentMeta.valorAlvo);
+        setMetas(prev => prev.map(m => m.id === id ? { ...m, valorAtual: novoValor } : m));
+
+    try {
         const res = await fetch(`${API_URL}/metas/${id}/valor`, {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -88,38 +110,54 @@ export const MetasProvider = ({ children }: { children: ReactNode }) => {
             throw new Error(error.error || "Erro ao adicionar valor");
         }
         await sync();
+    } catch (err) {
+        await sync();
+        throw err;
     }
-
+};
     const editarMeta = async (meta: MetaLocal) => {
         const token = sessionStorage.getItem("token") || localStorage.getItem("token");
         if (!token) throw new Error("Não autenticado");
-        const res = await fetch(`${API_URL}/metas`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-            body: JSON.stringify(meta),
-        });
-        if (!res.ok) {
-            const error = await res.json().catch(() => ({}));
-            throw new Error(error.error || "Erro ao editar meta");
-        }
-        await sync();
-    };
 
+        setMetas(prev => prev.map(m => m.id === meta.id ? meta : m));
+
+        try {
+            const res = await fetch(`${API_URL}/metas`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}  ` },
+                body: JSON.stringify(meta),
+            });
+            if (!res.ok) {
+                const error = await res.json().catch(() => ({}));
+                throw new Error(error.error || "Erro ao editar meta");
+            }
+            await sync();
+        } catch (err) {
+            await sync();
+            throw err;
+        }
+};
     const removerMeta = async (id: number) => {
         const token = sessionStorage.getItem("token") || localStorage.getItem("token");
         if (!token) throw new Error("Não autenticado");
 
-        const res = await fetch(`${API_URL}/metas/${id}`, {
-            method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        if (!res.ok) {
-            const error = await res.json().catch(() => ({}));
-            throw new Error(error.error || "Erro ao deletar meta");
-        }
-        await sync();
-    };
+        setMetas(prev => prev.filter(m => m.id !== id));
 
+        try {    
+            const res = await fetch(`${API_URL}/metas/${id}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (!res.ok) {
+                const error = await res.json().catch(() => ({}));
+                throw new Error(error.error || "Erro ao deletar meta");
+            }
+            await sync();
+        } catch (err) {
+            await sync();
+            throw err;
+    }
+};
     return (
         <MetasContext.Provider value={{ metas, adicionarMeta, removerMeta, adicionarValorMeta, editarMeta }}>
             {children}

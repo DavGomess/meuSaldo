@@ -92,7 +92,7 @@ export default function Orcamento() {
         try {
             await remover(categoriaId);
             await sync();
-            showToast("Orçamento removido", "success");
+            showToast("Orçamento removido com sucesso!", "success");
         } catch {
             showToast("Erro ao remover", "danger");
         }

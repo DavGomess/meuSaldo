@@ -9,9 +9,9 @@ import { useCallback } from "react";
 interface TransacoesContextType {
     transacoes: TransacaoLocal[];
     syncTransacoes: () => Promise<void>;
-    adicionar: (t: TransacaoLocal) => void;
-    atualizar: (t: TransacaoLocal) => void;
-    remover: (id: number) => void;
+    adicionarOtimitica: (nova: Partial<TransacaoLocal>) => number;
+    atualizarOtimitica: (id: number, updates: Partial<TransacaoLocal>) => void;
+    removerOtimitica: (id: number) => void;
 }
 
 const TransacoesContext = createContext<TransacoesContextType | undefined>(undefined);
@@ -22,17 +22,30 @@ export const TransacoesProvider = ({ children }: { children: ReactNode }) => {
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
-    const adicionar = (nova: TransacaoLocal) => {
-        setTransacoes(prev => [...prev, nova]);
+    const adicionarOtimitica = (nova: Partial<TransacaoLocal>) => {
+        const tempId = -Date.now();
+        const otimistica: TransacaoLocal = {
+            id: tempId,
+            valor: nova.valor ?? 0,
+            categoriaId: nova.categoriaId ?? null,
+            data: nova.data ?? new Date().toISOString(),
+            tipo: nova.tipo ?? "despesa",
+            status: nova.status ?? "pendente",
+            categoria: nova.categoria ?? "",
+            contaId: nova.contaId ?? null,
+            nome: nova.nome ?? "Transação otimista"
+        };
+        setTransacoes(prev => [...prev, otimistica]);
+        return tempId;
     };
 
-    const atualizar = (editada: TransacaoLocal) => {
-        setTransacoes(prev => prev.map(t => (t.id === editada.id ? { ...editada } : t)));
+    const atualizarOtimitica = (id: number, updates: Partial<TransacaoLocal>) => {
+        setTransacoes(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
     };
 
-    const remover = (id: number) => {
+    const removerOtimitica = (id: number) => {
         setTransacoes(prev => prev.filter(t => t.id !== id));
-    }
+    };
 
     const syncTransacoes = useCallback(async () => {
         const token = sessionStorage.getItem("token") || localStorage.getItem("token");
@@ -60,17 +73,17 @@ export const TransacoesProvider = ({ children }: { children: ReactNode }) => {
                 categoriaId: t.categoriaId ?? null,
                 data: new Date(t.data).toISOString(),
                 tipo: t.tipo as TransacaoTipo,
-                status: t.status as TransacaoStatus,    
-                categoria: typeof t.categoria === "string" ? t.categoria : t.categoria?.nome ?? "",        
+                status: t.status as TransacaoStatus,
+                categoria: typeof t.categoria === "string" ? t.categoria : t.categoria?.nome ?? "",
                 contaId: t.contaId ?? null,
                 nome: t.nome ?? t.conta?.nome ?? "Sem descrição"
 
             }))
             setTransacoes(formatadas)
-    } catch {
-        setTransacoes([]);
-    }
-}, [API_URL]);
+        } catch {
+            setTransacoes([]);
+        }
+    }, [API_URL]);
 
     useEffect(() => {
         if (user) {
@@ -79,7 +92,7 @@ export const TransacoesProvider = ({ children }: { children: ReactNode }) => {
     }, [syncTransacoes, user]);
 
     return (
-        <TransacoesContext.Provider value={{ transacoes, syncTransacoes, adicionar, atualizar, remover }}>
+        <TransacoesContext.Provider value={{ transacoes, syncTransacoes, adicionarOtimitica, atualizarOtimitica, removerOtimitica }}>
             {children}
         </TransacoesContext.Provider>
     );

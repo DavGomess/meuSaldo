@@ -42,7 +42,7 @@ export default function Categorias() {
         if (confirm("Tem certeza que quer deletar essa categoria?")) {
             try {
                 await deletarCategoria(id);
-                showToast("Categoria deletada!", "success");
+                showToast("Categoria deletada com sucesso!", "success");
             } catch {
                 showToast("Erro ao deletar categoria", "danger");
             }

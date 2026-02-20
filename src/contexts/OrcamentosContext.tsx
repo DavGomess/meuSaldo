@@ -103,6 +103,9 @@ export const OrcamentosProvider = ({ children }: { children: ReactNode }) => {
     const token = sessionStorage.getItem("token") || localStorage.getItem("token");
     if (!token) throw new Error("Não autenticado");
 
+    setOrcamentos(prev => prev.filter(o => o.categoriaId !== categoriaId));
+
+    try {
     const res = await fetch(`${API_URL}/orcamentos/${categoriaId}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
@@ -112,8 +115,11 @@ export const OrcamentosProvider = ({ children }: { children: ReactNode }) => {
       throw new Error(error.error || "Erro ao remover orçamento");
     }
     await sync();
-  };
-
+  } catch (err) {
+    await sync();
+    throw err;
+  }
+};
   const calcularProgresso = (categoriaId: number) => {
     const orcamento = orcamentos.find(o => o.categoriaId === categoriaId);
     if (!orcamento) {

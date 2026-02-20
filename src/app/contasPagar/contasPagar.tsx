@@ -16,7 +16,7 @@ import { useAuth } from "../../contexts/AuthContext";
 export default function ContasPagar() {
     const { user } = useAuth();
     const { categorias } = useCategorias();
-    const { syncTransacoes } = useTransacoes();
+    const { transacoes, syncTransacoes, adicionarOtimitica, removerOtimitica, atualizarOtimitica } = useTransacoes();
     const { showToast } = useToast();
     const [contas, setContas] = useState<ContaLocal[]>([])
     const [selectedConta, setSelectedConta] = useState<ContaLocal | null>(null)
@@ -113,51 +113,64 @@ export default function ContasPagar() {
             return;
         }
 
-    const tempId = -Date.now(); 
-    const optimisticAPI: ContaFromAPI = {
-        id: tempId,
-        nome: contaPayload.nome,
-        valor: contaPayload.valor,
-        categoriaId: editCategoriaId,
-        data: contaPayload.data,
-        status: definirStatus(contaPayload.data),
-        userId: user?.id || 0, 
-        categoria: categorias.find(c => c.id === editCategoriaId) || null
-    };
+        const tempId = -Date.now();
+        const optimisticAPI: ContaFromAPI = {
+            id: tempId,
+            nome: contaPayload.nome,
+            valor: contaPayload.valor,
+            categoriaId: editCategoriaId,
+            data: contaPayload.data,
+            status: definirStatus(contaPayload.data),
+            userId: user?.id || 0,
+            categoria: categorias.find(c => c.id === editCategoriaId) || null
+        };
 
-    const optimisticConta = mapContaFromAPI(optimisticAPI, categorias);
-    setContas(prev => [...prev, optimisticConta]);
-
-    try {
-        const res = await fetch(`${API_URL}/contasPagar`, {
-            method: "POST",
-            body: JSON.stringify(contaPayload),
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`
-            },
+        const tempTransId = adicionarOtimitica({
+            valor: -contaPayload.valor,
+            categoriaId: contaPayload.categoriaId,
+            data: contaPayload.data,
+            tipo: "despesa",
+            status: "pendente",
+            categoria: categorias.find(c => c.id === contaPayload.categoriaId)?.nome ?? "",
+            contaId: tempId,
+            nome: contaPayload.nome
         });
 
-        if (res.ok) {
-            showToast("Conta criada com sucesso!", "success");
-            const contaSalvaAPI: ContaFromAPI = await res.json();
-            const novaConta = mapContaFromAPI(contaSalvaAPI, categorias);
-            setContas(prev => prev.map(c => c.id === tempId ? novaConta : c));
-            form.reset();
-            setNovaData(null);
-            setEditCategoriaId(null);
-            setCategoriaDisplay("Categoria");
-            await syncTransacoes();
-        } else {
-            const erro = await res.json();
-            throw new Error(erro.error || "Erro ao criar conta");
-        }
-    } catch (err: unknown) {
-        const errorMessage = err instanceof Error ? err.message : "Erro ao criar conta";
+        const optimisticConta = mapContaFromAPI(optimisticAPI, categorias);
+        setContas(prev => [...prev, optimisticConta]);
+        showToast("Conta criada com sucesso!", "success");
 
-        showToast(errorMessage, "danger");
-        setContas(prev => prev.filter(c => c.id !== tempId));
-    }
+        try {
+            const res = await fetch(`${API_URL}/contasPagar`, {
+                method: "POST",
+                body: JSON.stringify(contaPayload),
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+            });
+
+            if (res.ok) {
+
+                const contaSalvaAPI: ContaFromAPI = await res.json();
+                const novaConta = mapContaFromAPI(contaSalvaAPI, categorias);
+                setContas(prev => prev.map(c => c.id === tempId ? novaConta : c));
+                form.reset();
+                setNovaData(null);
+                setEditCategoriaId(null);
+                setCategoriaDisplay("Categoria");
+                await syncTransacoes();
+            } else {
+                const erro = await res.json();
+                throw new Error(erro.error || "Erro ao criar conta");
+            }
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : "Erro ao criar conta";
+
+            showToast(errorMessage, "danger");
+            setContas(prev => prev.filter(c => c.id !== tempId));
+            removerOtimitica(tempTransId);
+        }
     };
 
     const toggleStatus = async (conta: ContaLocal) => {
@@ -188,9 +201,8 @@ export default function ContasPagar() {
                 throw new Error("Erro ao atualizar status");
             }
 
-            showToast("Conta editada com sucesso!", "success");
             await syncTransacoes();
-        
+
         } catch (err) {
             console.error(err);
             setContas(contas);
@@ -233,7 +245,6 @@ export default function ContasPagar() {
             showToast("Erro ao deletar conta", "danger");
         }
     }
-
     const renderLista = (status: StatusConta, titulo: string) => (
         <div className={styles.card}>
             <div className={styles.titulosStatus}>
@@ -475,39 +486,79 @@ export default function ContasPagar() {
                                                 return;
                                             }
 
-                                            try {
-                                                const res = await fetch(`${API_URL}/contasPagar/${selectedConta.id}`, {
-                                                    method: "PUT",
-                                                    body: JSON.stringify(payload),
-                                                    headers: {
-                                                        "Content-Type": "application/json",
-                                                        Authorization: `Bearer ${token}`
-                                                    },
-                                                })
+                                            const originalContas = [...contas];
+                                            const optimisticLocal: ContaLocal = {
+                                                ...selectedConta,
+                                                nome: payload.nome,
+                                                valor: payload.valor,
+                                                data: payload.data,
+                                                categoriaId: payload.categoriaId ?? selectedConta.categoriaId,
+                                                categoria: categorias.find(c => c.id === (payload.categoriaId ?? selectedConta.categoriaId))?.nome ?? selectedConta.categoria,
+                                                status: definirStatus(payload.data)
+                                            };
 
-                                                if (!res.ok) {
-                                                    const erro = await res.json().catch(() => ({ error: "Erro desconhecido" }));
-                                                    throw new Error(erro.error || "Falha ao editar");
-                                                }
+                                            setContas(prev => prev.map(c => c.id === selectedConta.id ? optimisticLocal : c));
+                                            localStorage.setItem("contas", JSON.stringify(contas.map(c => c.id === selectedConta.id ? optimisticLocal : c)));
+                                            showToast("Conta editada com sucesso!", "success");
 
-                                                const contaAtualizadaAPI: ContaFromAPI = await res.json();
-                                                const contaAtualizadaLocal = mapContaFromAPI(contaAtualizadaAPI, categorias);
-                                                const novasContas = contas.map(c => c.id === contaAtualizadaLocal.id ? contaAtualizadaLocal : c );
-
-                                                setContas(novasContas)
-                                                localStorage.setItem("contas", JSON.stringify(novasContas));
-
-                                                showToast("Conta editada com sucesso!", "success");
-                                                await syncTransacoes();
-                                            } catch (err: unknown) {
-                                                const errorMessage = err instanceof Error ? err.message : "Erro ao editar conta";
-                                                showToast(errorMessage, "danger");
-                                            } finally {
-                                                setIsEditing(false);
-                                                setSelectedConta(null);
-                                                setEditCategoriaId(null);
+                                            const transacaoExistente = transacoes.find(t => t.contaId === selectedConta.id);
+                                            const originalTransacao = transacaoExistente ? { ...transacaoExistente } : null;
+                                            if (transacaoExistente) {
+                                                atualizarOtimitica(transacaoExistente.id, {
+                                                    valor: -payload.valor, 
+                                                    data: payload.data,
+                                                    categoriaId: payload.categoriaId ?? transacaoExistente.categoriaId,
+                                                    categoria: categorias.find(c => c.id === (payload.categoriaId ?? transacaoExistente.categoriaId))?.nome ?? transacaoExistente.categoria,
+                                                    nome: payload.nome,
+                                                    status: "pendente"  
+                                                });
                                             }
-                                        }
+
+                                                try {
+                                                    const res = await fetch(`${API_URL}/contasPagar/${selectedConta.id}`, {
+                                                        method: "PUT",
+                                                        body: JSON.stringify(payload),
+                                                        headers: {
+                                                            "Content-Type": "application/json",
+                                                            Authorization: `Bearer ${token}`
+                                                        },
+                                                    })
+
+                                                    if (!res.ok) {
+                                                        const erro = await res.json().catch(() => ({ error: "Erro desconhecido" }));
+                                                        throw new Error(erro.error || "Falha ao editar");
+                                                    }
+
+                                                    const contaAtualizadaAPI: ContaFromAPI = await res.json();
+                                                    const contaAtualizadaLocal = mapContaFromAPI(contaAtualizadaAPI, categorias);
+                                                    const novasContas = contas.map(c => c.id === contaAtualizadaLocal.id ? contaAtualizadaLocal : c);
+
+                                                    setContas(novasContas)
+                                                    localStorage.setItem("contas", JSON.stringify(novasContas));
+
+                                                    await syncTransacoes();
+                                                } catch (err: unknown) {
+                                                    const errorMessage = err instanceof Error ? err.message : "Erro ao editar conta";
+                                                    showToast(errorMessage, "danger");
+                                                    setContas(originalContas);
+                                                    localStorage.setItem("contas", JSON.stringify(originalContas));
+
+                                                    if (originalTransacao) {
+                                                        atualizarOtimitica(originalTransacao.id, {
+                                                            valor: originalTransacao.valor,
+                                                            data: originalTransacao.data,
+                                                            categoriaId: originalTransacao.categoriaId,
+                                                            categoria: originalTransacao.categoria,
+                                                            nome: originalTransacao.nome,
+                                                            status: originalTransacao.status    
+                                                        });
+                                                    }
+                                                } finally {
+                                                    setIsEditing(false);
+                                                    setSelectedConta(null);
+                                                    setEditCategoriaId(null);
+                                                }
+                                            }
                                         }>
                                         Salvar
                                     </button>

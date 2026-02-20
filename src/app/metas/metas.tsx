@@ -220,7 +220,10 @@ export default function Metas() {
                                 </div>
                                 <div className={styles.iconsMetas}>
                                     <i className="bi bi-pencil iconPencil" onClick={() => handleEditClick(meta)}></i>
-                                    <i className="bi bi-trash iconTrash" onClick={() => removerMeta(meta.id)}></i>
+                                    <i className="bi bi-trash iconTrash" onClick={() => {removerMeta(meta.id)
+                                        .then(() => showToast("Meta removida com sucesso!", "success"))
+                                        .catch(() => showToast("Erro ao remover meta", "danger"));
+                                    }}></i>
                                 </div>
                             </div>
                             <div className={styles.bodyMetas}>
