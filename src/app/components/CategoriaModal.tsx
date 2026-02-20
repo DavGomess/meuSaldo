@@ -57,6 +57,7 @@ export default function CategoriaModal({ onClose, onSelect, multiple = true, cat
                     </div>
                     <div className="modal-body">
                         {Object.entries(categoriasUsuario).map(([tipo, lista]) => (
+                            lista.length > 0 && (
                             <div key={tipo}>
                                 <h6>{tipo === "Receita" ? "Receitas" : "Despesas"}</h6>
                                 <ul className=" mb-3 modalList">
@@ -72,6 +73,7 @@ export default function CategoriaModal({ onClose, onSelect, multiple = true, cat
                                     ))}
                                 </ul>
                             </div>
+                            )
                         ))}
                     </div>
 
