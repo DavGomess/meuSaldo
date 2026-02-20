@@ -26,7 +26,7 @@ export default function Orcamento() {
     categorias.forEach(c => categoriaMap.set(c.nome, c.id));
 
     const categoriasUsuario = {
-        Receita: categorias.filter(c => c.tipo === "receita").map(c => c.nome),
+        Receita: [],
         Despesa: categorias.filter(c => c.tipo === "despesa").map(c => c.nome),
     };
 
