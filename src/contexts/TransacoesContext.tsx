@@ -8,6 +8,7 @@ import { useCallback } from "react";
 
 interface TransacoesContextType {
     transacoes: TransacaoLocal[];
+    isLoading: boolean;
     syncTransacoes: () => Promise<void>;
     adicionarOtimitica: (nova: Partial<TransacaoLocal>) => number;
     atualizarOtimitica: (id: number, updates: Partial<TransacaoLocal>) => void;
@@ -18,7 +19,8 @@ const TransacoesContext = createContext<TransacoesContextType | undefined>(undef
 
 export const TransacoesProvider = ({ children }: { children: ReactNode }) => {
     const [transacoes, setTransacoes] = useState<TransacaoLocal[]>([]);
-    const { user } = useAuth();
+    const [isLoading, setIsLoading] = useState(true);
+    const { user, loading: authLoading } = useAuth();
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
@@ -51,6 +53,7 @@ export const TransacoesProvider = ({ children }: { children: ReactNode }) => {
         const token = sessionStorage.getItem("token") || localStorage.getItem("token");
         if (!token) {
             setTransacoes([]);
+            setIsLoading(false);
             return;
         }
 
@@ -64,6 +67,7 @@ export const TransacoesProvider = ({ children }: { children: ReactNode }) => {
 
             if (!Array.isArray(json)) {
                 setTransacoes([]);
+                setIsLoading(false);
                 return;
             }
 
@@ -82,17 +86,23 @@ export const TransacoesProvider = ({ children }: { children: ReactNode }) => {
             setTransacoes(formatadas)
         } catch {
             setTransacoes([]);
+        } finally {
+            setIsLoading(false);
         }
     }, [API_URL]);
 
     useEffect(() => {
+        if (authLoading) return; 
+
         if (user) {
             syncTransacoes();
-        }
-    }, [syncTransacoes, user]);
+        } else {
+            setIsLoading(false);
+        }    
+    }, [syncTransacoes, user, authLoading]);
 
     return (
-        <TransacoesContext.Provider value={{ transacoes, syncTransacoes, adicionarOtimitica, atualizarOtimitica, removerOtimitica }}>
+        <TransacoesContext.Provider value={{ transacoes, isLoading, syncTransacoes, adicionarOtimitica, atualizarOtimitica, removerOtimitica }}>
             {children}
         </TransacoesContext.Provider>
     );

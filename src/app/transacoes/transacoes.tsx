@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import styles from "./transacoes.module.css";
 import CategoriaModal from "../components/CategoriaModal";
 import PeriodoModal from "../components/PeriodoModal";
@@ -11,13 +11,12 @@ import { formatarValor } from "../../utils/formatarValor";
 
 export default function Transacoes() {
     const { categorias } = useCategorias();
-    const { transacoes, syncTransacoes } = useTransacoes();
+    const { transacoes, isLoading } = useTransacoes();
     const [openModal, setOpenModal] = useState<null | "categoria" | "periodo">(null);
     const [selectedCategoria, setSelectedCategoria] = useState<string[]>([]);
     const [selectedPeriodo, setSelectedPeriodo] = useState<PeriodoSelecionado | null>(null);
     const [pesquisa, setPesquisa] = useState("");
     const { exibirAbreviado } = useDisplayPreferences();
-    const [isLoading, setIsLoading] = useState(true);
 
     const parseDate = (dateString: string): Date => {
     const datePart = dateString.split("T")[0];
@@ -33,14 +32,6 @@ const formatarDataParaExibir = (dateString: string): string => {
         return "Data inválida";
     }
 };
-
-    useEffect(() => {
-        const loadTransacoes = async () => {
-            await syncTransacoes();
-            setIsLoading(false);
-        };
-        loadTransacoes();
-    }, []);
 
     const transacoesPesquisadas = transacoes.filter(t =>
         t.nome.toLowerCase().includes(pesquisa.toLowerCase()) ||
