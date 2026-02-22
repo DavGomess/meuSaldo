@@ -115,7 +115,7 @@ const formatarDataParaExibir = (dateString: string): string => {
 
     useEffect(() => {
         if (transacoesFiltradas.length === 0 && !isLoading && !hasPendingOptimistic) {
-            const timer = setTimeout(() => setShowNone(true), 200);
+            const timer = setTimeout(() => setShowNone(true), 500);
             return () => clearTimeout(timer);
         } else {
             setShowNone(false);
