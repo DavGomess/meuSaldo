@@ -110,6 +110,8 @@ const formatarDataParaExibir = (dateString: string): string => {
         handleCloseModal();
     };
 
+    const hasPendingOptimistic = transacoes.some(t => t.id < 0);
+
     return (
         <div className={styles.main}>
             <div className={styles.cardFiltro}>
@@ -153,7 +155,7 @@ const formatarDataParaExibir = (dateString: string): string => {
             </div>
             <div className={styles.cardTransacoes}>
                 <h3 className="mb-3">Transações</h3>
-                {isLoading ? (
+                {isLoading || hasPendingOptimistic ? (
                     <p>Carregando transações...</p>
                 ) : transacoesFiltradas.length === 0 ? (
                     <p>Nenhuma transação encontrada...</p>
