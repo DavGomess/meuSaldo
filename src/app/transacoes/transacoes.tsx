@@ -18,6 +18,7 @@ export default function Transacoes() {
     const [pesquisa, setPesquisa] = useState("");
     const { exibirAbreviado } = useDisplayPreferences();
     const [isLoading, setIsLoading] = useState(true);
+    const [showNone, setShowNone] = useState(false);
 
     const parseDate = (dateString: string): Date => {
     const datePart = dateString.split("T")[0];
@@ -112,6 +113,15 @@ const formatarDataParaExibir = (dateString: string): string => {
 
     const hasPendingOptimistic = transacoes.some(t => t.id < 0);
 
+    useEffect(() => {
+        if (transacoesFiltradas.length === 0 && !isLoading && !hasPendingOptimistic) {
+            const timer = setTimeout(() => setShowNone(true), 200);
+            return () => clearTimeout(timer);
+        } else {
+            setShowNone(false);
+        }
+    }, [transacoesFiltradas.length, isLoading, hasPendingOptimistic]);
+
     return (
         <div className={styles.main}>
             <div className={styles.cardFiltro}>
@@ -155,10 +165,10 @@ const formatarDataParaExibir = (dateString: string): string => {
             </div>
             <div className={styles.cardTransacoes}>
                 <h3 className="mb-3">Transações</h3>
-                {transacoesFiltradas.length === 0 ? (
-                    <p>Nenhuma transação encontrada...</p>
-                ) : isLoading || hasPendingOptimistic ? (
+                {isLoading || hasPendingOptimistic ? (
                     <p>Carregando transações...</p>
+                ) : showNone ? (
+                    <p>Nenhuma transação encontrada...</p>
                 ) : (
                     <ul className={styles.listaTransacoes}>
                         {transacoesFiltradas.map((conta) => (
