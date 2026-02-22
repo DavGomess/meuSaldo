@@ -18,7 +18,6 @@ export default function Transacoes() {
     const [pesquisa, setPesquisa] = useState("");
     const { exibirAbreviado } = useDisplayPreferences();
     const [isLoading, setIsLoading] = useState(true);
-    const [dataLoaded, setDataLoaded] = useState(false);
 
     const parseDate = (dateString: string): Date => {
     const datePart = dateString.split("T")[0];
@@ -41,7 +40,7 @@ const formatarDataParaExibir = (dateString: string): string => {
             setIsLoading(false);
         };
         loadTransacoes();
-    }, [syncTransacoes]);
+    }, []);
 
     const transacoesPesquisadas = transacoes.filter(t =>
         t.nome.toLowerCase().includes(pesquisa.toLowerCase()) ||
@@ -112,12 +111,6 @@ const formatarDataParaExibir = (dateString: string): string => {
     };
 
     const hasPendingOptimistic = transacoes.some(t => t.id < 0);
-
-    useEffect(() => {
-        if (!isLoading) {
-            setDataLoaded(true);
-            }
-        }, [isLoading]);
 
     return (
         <div className={styles.main}>
