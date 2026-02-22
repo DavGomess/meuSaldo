@@ -114,13 +114,16 @@ const formatarDataParaExibir = (dateString: string): string => {
     const hasPendingOptimistic = transacoes.some(t => t.id < 0);
 
     useEffect(() => {
-        if (transacoesFiltradas.length === 0 && !isLoading && !hasPendingOptimistic) {
-            const timer = setTimeout(() => setShowNone(true), 1000);
+        if (!hasPendingOptimistic) {
+            setShowNone(true);
+            const timer = setTimeout(() => {
+                setShowNone(false);
+        }, 500);
             return () => clearTimeout(timer);
         } else {
             setShowNone(false);
         }
-    }, [transacoesFiltradas.length, isLoading, hasPendingOptimistic]);
+    }, [hasPendingOptimistic]);
 
     return (
         <div className={styles.main}>
@@ -165,9 +168,9 @@ const formatarDataParaExibir = (dateString: string): string => {
             </div>
             <div className={styles.cardTransacoes}>
                 <h3 className="mb-3">Transações</h3>
-                {isLoading || hasPendingOptimistic ? (
+                {isLoading || hasPendingOptimistic || showNone ? (
                     <p>Carregando transações...</p>
-                ) : showNone ? (
+                ) : transacoesFiltradas.length === 0 ? (
                     <p>Nenhuma transação encontrada...</p>
                 ) : (
                     <ul className={styles.listaTransacoes}>
