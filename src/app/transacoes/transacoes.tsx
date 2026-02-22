@@ -18,7 +18,7 @@ export default function Transacoes() {
     const [pesquisa, setPesquisa] = useState("");
     const { exibirAbreviado } = useDisplayPreferences();
     const [isLoading, setIsLoading] = useState(true);
-    const [showNone, setShowNone] = useState(false);
+    const [dataLoaded, setDataLoaded] = useState(false);
 
     const parseDate = (dateString: string): Date => {
     const datePart = dateString.split("T")[0];
@@ -114,16 +114,10 @@ const formatarDataParaExibir = (dateString: string): string => {
     const hasPendingOptimistic = transacoes.some(t => t.id < 0);
 
     useEffect(() => {
-        if (!hasPendingOptimistic) {
-            setShowNone(true);
-            const timer = setTimeout(() => {
-                setShowNone(false);
-        }, 500);
-            return () => clearTimeout(timer);
-        } else {
-            setShowNone(false);
-        }
-    }, [hasPendingOptimistic]);
+        if (!isLoading && transacoesFiltradas.length > 0) {
+            setDataLoaded(true);
+            }
+        }, [isLoading, transacoesFiltradas.length]);
 
     return (
         <div className={styles.main}>
@@ -168,7 +162,7 @@ const formatarDataParaExibir = (dateString: string): string => {
             </div>
             <div className={styles.cardTransacoes}>
                 <h3 className="mb-3">Transações</h3>
-                {isLoading || hasPendingOptimistic || showNone ? (
+                {isLoading || hasPendingOptimistic || !dataLoaded ? (
                     <p>Carregando transações...</p>
                 ) : transacoesFiltradas.length === 0 ? (
                     <p>Nenhuma transação encontrada...</p>
