@@ -155,10 +155,10 @@ const formatarDataParaExibir = (dateString: string): string => {
             </div>
             <div className={styles.cardTransacoes}>
                 <h3 className="mb-3">Transações</h3>
-                {isLoading || hasPendingOptimistic ? (
-                    <p>Carregando transações...</p>
-                ) : transacoesFiltradas.length === 0 ? (
+                {transacoesFiltradas.length === 0 ? (
                     <p>Nenhuma transação encontrada...</p>
+                ) : isLoading || hasPendingOptimistic ? (
+                    <p>Carregando transações...</p>
                 ) : (
                     <ul className={styles.listaTransacoes}>
                         {transacoesFiltradas.map((conta) => (
