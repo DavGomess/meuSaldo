@@ -17,6 +17,7 @@ export default function Transacoes() {
     const [selectedPeriodo, setSelectedPeriodo] = useState<PeriodoSelecionado | null>(null);
     const [pesquisa, setPesquisa] = useState("");
     const { exibirAbreviado } = useDisplayPreferences();
+    const [isLoading, setIsLoading] = useState(true);
 
     const parseDate = (dateString: string): Date => {
     const datePart = dateString.split("T")[0];
@@ -34,7 +35,11 @@ const formatarDataParaExibir = (dateString: string): string => {
 };
 
     useEffect(() => {
-        syncTransacoes();
+        const loadTransacoes = async () => {
+            await syncTransacoes();
+            setIsLoading(false);
+        };
+        loadTransacoes();
     }, [syncTransacoes]);
 
     const transacoesPesquisadas = transacoes.filter(t =>
@@ -148,7 +153,9 @@ const formatarDataParaExibir = (dateString: string): string => {
             </div>
             <div className={styles.cardTransacoes}>
                 <h3 className="mb-3">Transações</h3>
-                {transacoesFiltradas.length === 0 ? (
+                {isLoading ? (
+                    <p>Carregando transações...</p>
+                ) : transacoesFiltradas.length === 0 ? (
                     <p>Nenhuma transação encontrada...</p>
                 ) : (
                     <ul className={styles.listaTransacoes}>
