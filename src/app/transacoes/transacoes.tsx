@@ -174,9 +174,9 @@ const formatarDataParaExibir = (dateString: string): string => {
                                     <div className={styles.ladoDireitoTransacao}>
                                         <div className={styles.valorTransacao}>
                                             {categoriasUsuario.Despesa.includes(conta.categoria) ? (
-                                                <h5 className={styles.vermelhoTextoValor}>- {formatarValor(conta.valor, exibirAbreviado)}</h5>
+                                                <h5 className={styles.vermelhoTextoValor}> {formatarValor(conta.valor, exibirAbreviado)}</h5>
                                             ) : (
-                                                <h5 className={styles.verdeTextoValor}>+ {formatarValor(conta.valor, exibirAbreviado)}</h5>
+                                                <h5 className={styles.verdeTextoValor}> {formatarValor(conta.valor, exibirAbreviado)}</h5>
                                             )}
                                         </div>
                                     </div>

@@ -505,7 +505,7 @@ export default function ContasPagar() {
                                             const originalTransacao = transacaoExistente ? { ...transacaoExistente } : null;
                                             if (transacaoExistente) {
                                                 atualizarOtimitica(transacaoExistente.id, {
-                                                    valor: -payload.valor, 
+                                                    valor: payload.valor, 
                                                     data: payload.data,
                                                     categoriaId: payload.categoriaId ?? transacaoExistente.categoriaId,
                                                     categoria: categorias.find(c => c.id === (payload.categoriaId ?? transacaoExistente.categoriaId))?.nome ?? transacaoExistente.categoria,
